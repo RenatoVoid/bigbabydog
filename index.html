@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO -->
+    <title>BIGBABY DOG - Streetwear & College</title>
+    <meta name="description" content="BIGBABY DOG - Catálogo de roupas streetwear e estilo college. Confira nossa coleção.">
+    <meta name="theme-color" content="#0f0f0f">
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="imagens/logo/logo.png" type="image/x-icon">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles/style.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ========== OVERLAY ========== -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- ========== MENU LATERAL ========== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-logo">
+                <img src="imagens/logo/logo.png" alt="BIGBABY DOG" class="sidebar-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <span style="display:none;"> BIGBABY DOG</span>
+            </h2>
+            <button class="sidebar-close" id="sidebar-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <!-- Menu principal -->
+            <ul class="sidebar-menu">
+                <li><a href="#home" class="sidebar-link sidebar-home" data-page="home">🏠 Início</a></li>
+            </ul>
+            
+            <!-- Categorias -->
+            <div class="sidebar-categories">
+                <h3 class="sidebar-title">Categorias</h3>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="#camisetas" class="sidebar-link" data-page="camisetas">
+                            <i class="fas fa-tshirt"></i> Camisetas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#blusas" class="sidebar-link" data-page="blusas">
+                            <i class="fas fa-vest"></i> Blusas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#corta-vento" class="sidebar-link" data-page="corta-vento">
+                            <i class="fas fa-wind"></i> Corta Vento
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#jaquetas" class="sidebar-link" data-page="jaquetas">
+                            <i class="fas fa-user-tie"></i> Jaquetas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#calcas" class="sidebar-link" data-page="calcas">
+                            <i class="fas fa-socks"></i> Calças
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#acessorios" class="sidebar-link" data-page="acessorios">
+                            <i class="fas fa-gem"></i> Acessórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Páginas -->
+            <div class="sidebar-pages">
+                <h3 class="sidebar-title">Mais</h3>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="#contato" class="sidebar-link" data-page="contato">
+                            <i class="fas fa-envelope"></i> Contato
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="https://instagram.com/renato._.dtk" target="_blank" class="sidebar-social">
+                <i class="fab fa-instagram"></i> @renato._.dtk
+            </a>
+        </div>
+    </aside>
+
+    <!-- ========== HEADER ========== -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <button class="hamburger" id="hamburger" aria-label="Abrir menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                
+                <a href="#home" class="header-logo" data-page="home">
+                    <img src="imagens/logo.png" alt="BIGBABY DOG" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <span class="logo-text" style="display:none;"> BIGBABY DOG</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== CONTEÚDO PRINCIPAL (Trocado via JS) ========== -->
+    <main id="main-content">
+        <!-- O conteúdo será renderizado dinamicamente -->
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="container">
+            <p> BIGBABY DOG © 2024 - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <!-- ========== MODAL ========== -->
+    <div class="modal" id="image-modal">
+        <span class="modal-close" id="modal-close">&times;</span>
+        <img src="" alt="Visualização do produto" id="modal-image">
+        <div class="modal-info" id="modal-info"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="scripts/main.js"></script>
+</body>
+</html>
