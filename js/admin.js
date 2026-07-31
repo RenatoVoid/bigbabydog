@@ -8,11 +8,10 @@ const supabaseUrl = 'https://lekzyptgypjkwpxuruel.supabase.co';
 const supabaseKey = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Elementos do DOM (serão preenchidos no DOMContentLoaded)
+// Elementos do DOM
 let elementos = {};
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Mapeia os elementos da tela de login e do painel
     elementos = {
         loginOverlay: document.getElementById('adminLoginOverlay'),
         adminPanel: document.getElementById('adminPanel'),
@@ -21,21 +20,21 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLogin: document.getElementById('btnAdminLogin'),
         formProduto: document.getElementById('formProduto'),
         produtosTbody: document.getElementById('adminProdutosTbody'),
-        // Campos do formulário
         prodNome: document.getElementById('prodNome'),
         prodCategoria: document.getElementById('prodCategoria'),
         prodPreco: document.getElementById('prodPreco'),
         prodPrecoAntigo: document.getElementById('prodPrecoAntigo'),
         prodDescricao: document.getElementById('prodDescricao'),
-        prodImagem: document.getElementById('prodImagemUpload'),
+        prodImagemUpload: document.getElementById('prodImagemUpload'),
+        prodImagemUrl: document.getElementById('prodImagemUrl'),
         prodDestaque: document.getElementById('prodDestaque'),
         prodNovo: document.getElementById('prodNovo'),
+        tamanhoCheckboxes: document.querySelectorAll('.tamanho-checkbox'),
+        btnSalvar: document.getElementById('btnSalvarProduto'),
     };
 
-    // Verifica se já existe uma sessão ativa
     verificarSessao();
 
-    // Eventos de login
     if (elementos.btnLogin) {
         elementos.btnLogin.addEventListener('click', fazerLogin);
     }
@@ -45,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Evento de submit do formulário de produto
+    // Evento de submit no <form> real
     if (elementos.formProduto) {
         elementos.formProduto.addEventListener('submit', adicionarProduto);
     }
@@ -143,7 +142,6 @@ async function carregarProdutosAdmin() {
 async function adicionarProduto(event) {
     event.preventDefault();
 
-    // Coleta os dados do formulário
     const nome = elementos.prodNome.value.trim();
     const categoria = elementos.prodCategoria.value;
     const preco = parseFloat(elementos.prodPreco.value);
@@ -151,15 +149,25 @@ async function adicionarProduto(event) {
     const descricao = elementos.prodDescricao.value.trim();
     const destaque = elementos.prodDestaque.checked;
     const novo = elementos.prodNovo.checked;
-    const arquivo = elementos.prodImagem.files[0];
+    const arquivo = elementos.prodImagemUpload.files[0];
+    const urlImagem = elementos.prodImagemUrl.value.trim();
+
+    // Tamanhos selecionados
+    const tamanhos = Array.from(elementos.tamanhoCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+    if (tamanhos.length === 0) {
+        alert('Selecione pelo menos um tamanho.');
+        return;
+    }
 
     if (!nome || !categoria || isNaN(preco)) {
         alert('Preencha nome, categoria e preço.');
         return;
     }
 
-    // Upload da imagem (se houver)
     let imagemUrl = null;
+
     if (arquivo) {
         const nomeArquivo = `produto_${Date.now()}_${arquivo.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -173,11 +181,12 @@ async function adicionarProduto(event) {
 
         const { data: urlData } = supabase.storage.from('produtos').getPublicUrl(nomeArquivo);
         imagemUrl = urlData.publicUrl;
+    } else if (urlImagem) {
+        imagemUrl = urlImagem;
     } else {
         imagemUrl = `https://placehold.co/600x800/1a1a2e/b366ff?text=${encodeURIComponent(nome)}`;
     }
 
-    // Insere no banco
     const { error } = await supabase.from('produtos').insert([{
         nome,
         categoria,
@@ -185,7 +194,7 @@ async function adicionarProduto(event) {
         preco_antigo: precoAntigo,
         descricao,
         imagem: imagemUrl,
-        tamanhos: ['P', 'M', 'G', 'GG'],
+        tamanhos,
         destaque,
         novo,
     }]);
@@ -197,6 +206,8 @@ async function adicionarProduto(event) {
 
     alert('Produto cadastrado com sucesso!');
     elementos.formProduto.reset();
+    // Re-marcar tamanhos padrão após reset
+    elementos.tamanhoCheckboxes.forEach(cb => cb.checked = true);
     carregarProdutosAdmin();
 }
 
