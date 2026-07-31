@@ -1,236 +1,212 @@
 // ============================================================
-// ADMIN.JS - Painel administrativo protegido por senha
+// ADMIN.JS - Painel administrativo da BIGBABYDOG (Supabase)
 // ============================================================
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const ADMIN_SENHA = 'admin123';
-let adminAutenticado = false;
-let produtosCustomizados = JSON.parse(localStorage.getItem('bbd_produtos_custom') || '[]');
+// ---------- CONEXÃO COM O SUPABASE ----------
+const supabaseUrl = 'https://lekzyptgypjkwpxuruel.supabase.co';
+const supabaseKey = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-/**
- * Inicializa o painel admin
- */
-function initAdmin() {
-    // Se já estiver autenticado nesta sessão
-    if (sessionStorage.getItem('bbd_admin_auth') === 'true') {
-        adminAutenticado = true;
+// Elementos do DOM (serão preenchidos no DOMContentLoaded)
+let elementos = {};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Mapeia os elementos da tela de login e do painel
+    elementos = {
+        loginOverlay: document.getElementById('adminLoginOverlay'),
+        adminPanel: document.getElementById('adminPanel'),
+        emailInput: document.getElementById('adminEmail'),
+        senhaInput: document.getElementById('adminSenha'),
+        btnLogin: document.getElementById('btnAdminLogin'),
+        formProduto: document.getElementById('formProduto'),
+        produtosTbody: document.getElementById('adminProdutosTbody'),
+        // Campos do formulário
+        prodNome: document.getElementById('prodNome'),
+        prodCategoria: document.getElementById('prodCategoria'),
+        prodPreco: document.getElementById('prodPreco'),
+        prodPrecoAntigo: document.getElementById('prodPrecoAntigo'),
+        prodDescricao: document.getElementById('prodDescricao'),
+        prodImagem: document.getElementById('prodImagemUpload'),
+        prodDestaque: document.getElementById('prodDestaque'),
+        prodNovo: document.getElementById('prodNovo'),
+    };
+
+    // Verifica se já existe uma sessão ativa
+    verificarSessao();
+
+    // Eventos de login
+    if (elementos.btnLogin) {
+        elementos.btnLogin.addEventListener('click', fazerLogin);
+    }
+    if (elementos.senhaInput) {
+        elementos.senhaInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') fazerLogin();
+        });
+    }
+
+    // Evento de submit do formulário de produto
+    if (elementos.formProduto) {
+        elementos.formProduto.addEventListener('submit', adicionarProduto);
+    }
+
+    // Abas
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const target = tab.dataset.tab;
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`section-${target}`).classList.add('active');
+        });
+    });
+});
+
+// ========== AUTENTICAÇÃO ==========
+async function verificarSessao() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
         mostrarPainel();
     } else {
         mostrarLogin();
     }
 }
 
-/**
- * Mostra a tela de login
- */
-function mostrarLogin() {
-    const overlay = document.getElementById('adminLoginOverlay');
-    if (overlay) overlay.style.display = 'flex';
-}
+async function fazerLogin() {
+    const email = elementos.emailInput.value.trim() || 'admin@bigbabydog.com';
+    const senha = elementos.senhaInput.value;
 
-/**
- * Verifica a senha do admin
- */
-function verificarSenha() {
-    const input = document.getElementById('adminSenha');
-    const senha = input.value;
-    
-    if (senha === ADMIN_SENHA) {
-        adminAutenticado = true;
-        sessionStorage.setItem('bbd_admin_auth', 'true');
-        document.getElementById('adminLoginOverlay').style.display = 'none';
-        mostrarPainel();
+    if (!senha) {
+        alert('Digite a senha.');
+        return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    if (error) {
+        alert('Erro ao fazer login: ' + error.message);
     } else {
-        alert('Senha incorreta! Tente novamente.');
-        input.value = '';
-        input.focus();
+        mostrarPainel();
     }
 }
 
-/**
- * Mostra o painel admin após autenticação
- */
+function mostrarLogin() {
+    elementos.loginOverlay.style.display = 'flex';
+    elementos.adminPanel.style.display = 'none';
+}
+
 function mostrarPainel() {
-    const painel = document.getElementById('adminPanel');
-    if (painel) painel.style.display = 'block';
-    
+    elementos.loginOverlay.style.display = 'none';
+    elementos.adminPanel.style.display = 'block';
     carregarProdutosAdmin();
-    carregarPedidosAdmin();
-    configurarTabs();
-    configurarFormProduto();
 }
 
-/**
- * Configura as abas do painel
- */
-function configurarTabs() {
-    const tabs = document.querySelectorAll('.admin-tab');
-    const sections = document.querySelectorAll('.admin-section');
-    
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            const target = tab.dataset.tab;
-            sections.forEach(s => s.classList.remove('active'));
-            document.getElementById(`section-${target}`).classList.add('active');
-        });
-    });
+async function fazerLogout() {
+    await supabase.auth.signOut();
+    mostrarLogin();
 }
+window.fazerLogout = fazerLogout;
 
-/**
- * Carrega e exibe a lista de produtos no admin
- */
-function carregarProdutosAdmin() {
-    const tbody = document.getElementById('adminProdutosTbody');
+// ========== GERENCIAMENTO DE PRODUTOS ==========
+async function carregarProdutosAdmin() {
+    const tbody = elementos.produtosTbody;
     if (!tbody) return;
-    
-    const produtos = obterProdutos();
-    
+
+    const { data: produtos, error } = await supabase
+        .from('produtos')
+        .select('*')
+        .order('id', { ascending: true });
+
+    if (error) {
+        tbody.innerHTML = '<tr><td colspan="6">Erro ao carregar.</td></tr>';
+        return;
+    }
+
+    if (!produtos || produtos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">Nenhum produto cadastrado.</td></tr>';
+        return;
+    }
+
     tbody.innerHTML = produtos.map(p => `
         <tr>
             <td>${p.id}</td>
-            <td><img src="${p.imagens[0]}" alt="${p.nome}" style="width:40px;height:50px;object-fit:cover;border-radius:4px"></td>
+            <td><img src="${p.imagem || 'https://placehold.co/40x50'}" style="width:40px;height:50px;object-fit:cover;border-radius:4px;"></td>
             <td>${p.nome}</td>
             <td>${p.categoria}</td>
-            <td>${formatarMoeda(p.preco)}</td>
+            <td>R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</td>
             <td>
-                <button class="btn-sm" onclick="editarProduto(${p.id})">✏️ Editar</button>
-                <button class="btn-sm danger" onclick="removerProduto(${p.id})">🗑️ Remover</button>
+                <button class="btn-sm danger" onclick="excluirProduto(${p.id})">Excluir</button>
             </td>
         </tr>
     `).join('');
 }
 
-/**
- * Configura o formulário de adicionar/editar produto
- */
-function configurarFormProduto() {
-    const form = document.getElementById('formProduto');
-    if (!form) return;
-    
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const id = parseInt(document.getElementById('prodId').value) || Date.now();
-        const produto = {
-            id: id,
-            nome: document.getElementById('prodNome').value,
-            categoria: document.getElementById('prodCategoria').value,
-            preco: parseFloat(document.getElementById('prodPreco').value),
-            precoAntigo: parseFloat(document.getElementById('prodPrecoAntigo').value) || null,
-            descricao: document.getElementById('prodDescricao').value,
-            imagens: [
-                document.getElementById('prodImg1').value || 'https://placehold.co/600x800/1a1a2e/b366ff?text=Produto',
-                document.getElementById('prodImg2').value || 'https://placehold.co/600x800/1a1a2e/b366ff?text=Produto',
-                document.getElementById('prodImg3').value || 'https://placehold.co/600x800/1a1a2e/b366ff?text=Produto'
-            ],
-            tamanhos: document.getElementById('prodTamanhos').value.split(',').map(t => t.trim()),
-            destaque: document.getElementById('prodDestaque').checked,
-            novo: document.getElementById('prodNovo').checked
-        };
-        
-        salvarProdutoCustomizado(produto);
-        form.reset();
-        document.getElementById('prodId').value = '';
-        carregarProdutosAdmin();
-        alert('Produto salvo com sucesso! ✅');
-    });
-}
+async function adicionarProduto(event) {
+    event.preventDefault();
 
-/**
- * Salva um produto customizado (novo ou editado)
- */
-function salvarProdutoCustomizado(produto) {
-    // Remove versão anterior se existir
-    produtosCustomizados = produtosCustomizados.filter(p => p.id !== produto.id);
-    produtosCustomizados.push(produto);
-    localStorage.setItem('bbd_produtos_custom', JSON.stringify(produtosCustomizados));
-}
+    // Coleta os dados do formulário
+    const nome = elementos.prodNome.value.trim();
+    const categoria = elementos.prodCategoria.value;
+    const preco = parseFloat(elementos.prodPreco.value);
+    const precoAntigo = parseFloat(elementos.prodPrecoAntigo.value) || null;
+    const descricao = elementos.prodDescricao.value.trim();
+    const destaque = elementos.prodDestaque.checked;
+    const novo = elementos.prodNovo.checked;
+    const arquivo = elementos.prodImagem.files[0];
 
-/**
- * Preenche o formulário para editar um produto existente
- */
-function editarProduto(id) {
-    const produtos = obterProdutos();
-    const produto = produtos.find(p => p.id === id);
-    if (!produto) return;
-    
-    document.getElementById('prodId').value = produto.id;
-    document.getElementById('prodNome').value = produto.nome;
-    document.getElementById('prodCategoria').value = produto.categoria;
-    document.getElementById('prodPreco').value = produto.preco;
-    document.getElementById('prodPrecoAntigo').value = produto.precoAntigo || '';
-    document.getElementById('prodDescricao').value = produto.descricao;
-    document.getElementById('prodImg1').value = produto.imagens[0] || '';
-    document.getElementById('prodImg2').value = produto.imagens[1] || '';
-    document.getElementById('prodImg3').value = produto.imagens[2] || '';
-    document.getElementById('prodTamanhos').value = produto.tamanhos.join(', ');
-    document.getElementById('prodDestaque').checked = produto.destaque;
-    document.getElementById('prodNovo').checked = produto.novo;
-    
-    // Scroll até o formulário
-    document.getElementById('formProduto').scrollIntoView({ behavior: 'smooth' });
-}
-
-/**
- * Remove um produto customizado (produtos originais não podem ser removidos, apenas ocultados)
- */
-function removerProduto(id) {
-    if (!confirm('Tem certeza que deseja remover este produto?')) return;
-    
-    // Adiciona à lista de removidos (para produtos originais) ou remove dos customizados
-    if (id <= 10) {
-        // Produto original - marca como inativo
-        const produto = { id: id, ativo: false };
-        salvarProdutoCustomizado(produto);
-    } else {
-        produtosCustomizados = produtosCustomizados.filter(p => p.id !== id);
-        localStorage.setItem('bbd_produtos_custom', JSON.stringify(produtosCustomizados));
+    if (!nome || !categoria || isNaN(preco)) {
+        alert('Preencha nome, categoria e preço.');
+        return;
     }
-    
+
+    // Upload da imagem (se houver)
+    let imagemUrl = null;
+    if (arquivo) {
+        const nomeArquivo = `produto_${Date.now()}_${arquivo.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('produtos')
+            .upload(nomeArquivo, arquivo, { cacheControl: '3600' });
+
+        if (uploadError) {
+            alert('Erro ao enviar imagem: ' + uploadError.message);
+            return;
+        }
+
+        const { data: urlData } = supabase.storage.from('produtos').getPublicUrl(nomeArquivo);
+        imagemUrl = urlData.publicUrl;
+    } else {
+        imagemUrl = `https://placehold.co/600x800/1a1a2e/b366ff?text=${encodeURIComponent(nome)}`;
+    }
+
+    // Insere no banco
+    const { error } = await supabase.from('produtos').insert([{
+        nome,
+        categoria,
+        preco,
+        preco_antigo: precoAntigo,
+        descricao,
+        imagem: imagemUrl,
+        tamanhos: ['P', 'M', 'G', 'GG'],
+        destaque,
+        novo,
+    }]);
+
+    if (error) {
+        alert('Erro ao cadastrar: ' + error.message);
+        return;
+    }
+
+    alert('Produto cadastrado com sucesso!');
+    elementos.formProduto.reset();
     carregarProdutosAdmin();
 }
 
-/**
- * Carrega e exibe os pedidos recebidos
- */
-function carregarPedidosAdmin() {
-    const tbody = document.getElementById('adminPedidosTbody');
-    if (!tbody) return;
-    
-    const pedidos = obterPedidos();
-    
-    if (pedidos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhum pedido recebido ainda.</td></tr>';
+async function excluirProduto(id) {
+    if (!confirm('Excluir este produto?')) return;
+    const { error } = await supabase.from('produtos').delete().eq('id', id);
+    if (error) {
+        alert('Erro ao excluir: ' + error.message);
         return;
     }
-    
-    tbody.innerHTML = pedidos.map(p => {
-        const data = new Date(p.data).toLocaleString('pt-BR');
-        const itensResumo = p.itens.map(i => `${i.nome} (${i.tamanho}) x${i.quantidade}`).join(', ');
-        
-        return `
-            <tr>
-                <td><strong style="color:var(--neon)">${p.id}</strong></td>
-                <td>${data}</td>
-                <td>${p.cliente.nome}</td>
-                <td title="${itensResumo}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${itensResumo}</td>
-                <td>${formatarMoeda(p.subtotal)}</td>
-            </tr>
-        `;
-    }).join('');
+    carregarProdutosAdmin();
 }
-
-// ========== INICIALIZAÇÃO ==========
-document.addEventListener('DOMContentLoaded', () => {
-    initAdmin();
-    
-    // Evento de tecla Enter no campo de senha
-    const senhaInput = document.getElementById('adminSenha');
-    if (senhaInput) {
-        senhaInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') verificarSenha();
-        });
-    }
-});
+window.excluirProduto = excluirProduto;

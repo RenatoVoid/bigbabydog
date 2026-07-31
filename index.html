@@ -1,6 +1,6 @@
 <!-- ============================================================
      INDEX.HTML - Página Principal da BIGBABYDOG
-     Landing page com hero, drops em destaque, sobre e footer
+     Hero section, destaques do Supabase, sobre e footer
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -64,7 +64,7 @@
     <section class="container" style="padding: 60px 20px;">
         <h2 class="section-title"><span>🔥</span> DROP ATUAL <span>🔥</span></h2>
         <div class="produtos-grid" id="destaquesGrid">
-            <!-- Preenchido via JavaScript com produtos em destaque -->
+            <!-- Preenchido via JavaScript com produtos em destaque do Supabase -->
         </div>
         <div style="text-align:center; margin-top: 40px;">
             <a href="loja.html" class="btn btn-outline">VER TODOS OS PRODUTOS <i class="fas fa-arrow-right"></i></a>
@@ -95,32 +95,55 @@
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
-    <script src="js/dados.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/carrinho.js"></script>
-    
-    <script>
+    <script type="module">
+        // Importa funções do main.js e carrinho.js
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        // Configuração Supabase
+        const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Importa funções compartilhadas
+        const mainModule = await import('./js/main.js');
+        const carrinhoModule = await import('./js/carrinho.js');
+        
         /**
-         * Carrega os produtos em destaque na home
+         * Carrega os produtos em destaque da home
+         * Busca no Supabase produtos onde destaque = true
          */
-        function carregarDestaques() {
+        async function carregarDestaques() {
             const grid = document.getElementById('destaquesGrid');
             if (!grid) return;
             
-            const produtos = obterProdutos();
-            const destaques = produtos.filter(p => p.destaque);
+            const { data: produtos, error } = await window.supabase
+                .from('produtos')
+                .select('*')
+                .eq('destaque', true)
+                .order('id', { ascending: true });
             
-            grid.innerHTML = destaques.map(produto => `
+            if (error) {
+                console.error('Erro ao carregar destaques:', error);
+                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Erro ao carregar produtos</p>';
+                return;
+            }
+            
+            if (!produtos || produtos.length === 0) {
+                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Nenhum produto em destaque no momento</p>';
+                return;
+            }
+            
+            grid.innerHTML = produtos.map(produto => `
                 <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${produto.id}'">
                     ${produto.novo ? '<span class="card-badge badge-novo">Novo</span>' : ''}
-                    ${produto.precoAntigo ? '<span class="card-badge badge-promo">Promo</span>' : ''}
-                    <img src="${produto.imagens[0]}" alt="${produto.nome}" class="card-img" loading="lazy">
+                    ${produto.preco_antigo ? '<span class="card-badge badge-promo">Promo</span>' : ''}
+                    <img src="${produto.imagem || 'https://placehold.co/600x800/1a1a2e/b366ff?text=' + encodeURIComponent(produto.nome)}" alt="${produto.nome}" class="card-img" loading="lazy">
                     <div class="card-body">
                         <div class="card-categoria">${produto.categoria}</div>
                         <div class="card-nome">${produto.nome}</div>
                         <div class="card-preco">
                             <span class="card-preco-atual">${formatarMoeda(produto.preco)}</span>
-                            ${produto.precoAntigo ? `<span class="card-preco-antigo">${formatarMoeda(produto.precoAntigo)}</span>` : ''}
+                            ${produto.preco_antigo ? `<span class="card-preco-antigo">${formatarMoeda(produto.preco_antigo)}</span>` : ''}
                         </div>
                         <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='produto.html?id=${produto.id}'">
                             <i class="fas fa-shopping-bag"></i> COMPRAR

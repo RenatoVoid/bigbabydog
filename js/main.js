@@ -1,142 +1,94 @@
 // ============================================================
-// MAIN.JS - Funções compartilhadas entre todas as páginas
+// MAIN.JS - Catálogo de produtos da BIGBABYDOG (Supabase)
 // ============================================================
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-// ---------- CONFIGURAÇÃO GLOBAL ----------
-// NÚMERO DO WHATSAPP DA LOJA (altere aqui para mudar em todo o site)
-const WHATSAPP_LOJA = "5512996491449"; // Formato: 55 + DDD + número
-
-// ---------- UTILITÁRIOS ----------
-
-/**
- * Formata um número para o formato de moeda brasileira (R$)
- */
-function formatarMoeda(valor) {
-    return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
-}
+// ---------- CONEXÃO COM O SUPABASE ----------
+const supabaseUrl = 'https://lekzyptgypjkwpxuruel.supabase.co';
+const supabaseKey = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
- * Gera um ID único para pedidos
+ * Busca todos os produtos no banco e inicia a renderização
  */
-function gerarIdPedido() {
-    let ultimo = parseInt(localStorage.getItem('bbd_ultimo_pedido') || '0');
-    ultimo++;
-    localStorage.setItem('bbd_ultimo_pedido', ultimo);
-    return '#BBD-' + String(ultimo).padStart(3, '0');
-}
-
-/**
- * Aplica máscara de WhatsApp no formato (XX) XXXXX-XXXX
- */
-function mascaraWhatsApp(input) {
-    input.addEventListener('input', function(e) {
-        let valor = this.value.replace(/\D/g, '');
-        if (valor.length > 11) valor = valor.slice(0, 11);
-        if (valor.length > 2) {
-            valor = '(' + valor.slice(0, 2) + ') ' + valor.slice(2);
-        }
-        if (valor.length > 10) {
-            valor = valor.slice(0, 10) + '-' + valor.slice(10);
-        }
-        this.value = valor;
-    });
-}
-
-/**
- * Busca endereço pelo CEP usando a API ViaCEP
- */
-async function buscarCEP(cep, callback) {
-    cep = cep.replace(/\D/g, '');
-    if (cep.length !== 8) return;
-    
+async function carregarProdutos() {
     try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
-        if (!data.erro) {
-            callback({
-                rua: data.logradouro || '',
-                bairro: data.bairro || '',
-                cidade: data.localidade || '',
-                estado: data.uf || ''
-            });
+        // Consulta a tabela 'produtos' ordenada por ID
+        const { data: produtos, error } = await supabase
+            .from('produtos')
+            .select('*')
+            .order('id', { ascending: true });
+
+        if (error) {
+            throw error;
         }
-    } catch (erro) {
-        console.log('Erro ao buscar CEP:', erro);
-    }
-}
 
-/**
- * Obtém todos os produtos (mescla dados padrão com customizados do admin)
- */
-function obterProdutos() {
-    const customizados = JSON.parse(localStorage.getItem('bbd_produtos_custom') || '[]');
-    // Cria um mapa dos customizados por ID para substituição
-    const mapa = {};
-    customizados.forEach(p => { mapa[p.id] = p; });
-    
-    // Mescla: se tem customizado, usa ele; senão usa o original
-    const todos = [...PRODUTOS];
-    const resultado = todos.map(p => mapa[p.id] || p);
-    
-    // Adiciona produtos novos (com ID > 10 ou IDs que não existem no original)
-    customizados.forEach(p => {
-        if (!todos.find(orig => orig.id === p.id)) {
-            resultado.push(p);
-        }
-    });
-    
-    return resultado;
-}
-
-/**
- * Salva um pedido no histórico
- */
-function salvarPedido(pedido) {
-    const historico = JSON.parse(localStorage.getItem('bbd_pedidos') || '[]');
-    historico.unshift(pedido); // Adiciona no início (mais recente primeiro)
-    localStorage.setItem('bbd_pedidos', JSON.stringify(historico));
-}
-
-/**
- * Obtém histórico de pedidos
- */
-function obterPedidos() {
-    return JSON.parse(localStorage.getItem('bbd_pedidos') || '[]');
-}
-
-// ---------- NAVBAR MOBILE TOGGLE ----------
-document.addEventListener('DOMContentLoaded', () => {
-    // Configura o menu mobile se existir
-    const menuToggle = document.querySelector('.menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-        });
-        
-        // Fecha o menu ao clicar em um link
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('open');
-            });
-        });
-    }
-    
-    // Efeito de scroll na navbar
-    window.addEventListener('scroll', () => {
-        const navbar = document.querySelector('.navbar');
-        if (navbar) {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
+        // Se houver dados, renderiza; senão, mostra mensagem
+        if (produtos && produtos.length > 0) {
+            renderizarProdutos(produtos);
+        } else {
+            const container = document.getElementById('lista-produtos');
+            if (container) {
+                container.innerHTML = `<p class="text-center">Nenhum produto disponível no momento.</p>`;
             }
         }
-    });
-    
-    // Atualiza o contador do carrinho na navbar
-    if (typeof atualizarContadorCarrinho === 'function') {
-        atualizarContadorCarrinho();
+    } catch (erro) {
+        console.error('Erro ao carregar produtos:', erro.message);
+        const container = document.getElementById('lista-produtos');
+        if (container) {
+            container.innerHTML = `<p class="text-center">Erro ao carregar produtos. Tente novamente.</p>`;
+        }
     }
-});
+}
+
+/**
+ * Cria os cards HTML e insere no container #lista-produtos
+ * @param {Array} produtos - Lista de objetos retornados do Supabase
+ */
+function renderizarProdutos(produtos) {
+    const container = document.getElementById('lista-produtos');
+    if (!container) return;
+
+    // Limpa o container
+    container.innerHTML = '';
+
+    // Para cada produto, monta o card com as classes definidas no CSS
+    produtos.forEach(p => {
+        // Define a imagem (usa placeholder se não existir)
+        const imagem = p.imagem || `https://placehold.co/600x800/1a1a2e/b366ff?text=${encodeURIComponent(p.nome)}`;
+        
+        // Formata os preços
+        const precoAtual = Number(p.preco).toFixed(2).replace('.', ',');
+        const precoAntigoHtml = p.preco_antigo && p.preco_antigo > 0
+            ? `<span class="card-preco-antigo">R$ ${Number(p.preco_antigo).toFixed(2).replace('.', ',')}</span>`
+            : '';
+
+        // Cria o elemento do card usando a estrutura EXATA do CSS
+        const card = document.createElement('div');
+        card.className = 'produto-card';
+
+        card.innerHTML = `
+            <img src="${imagem}" alt="${p.nome}" class="card-img" />
+            <div class="card-body">
+                <div class="card-categoria">${p.categoria || 'Geral'}</div>
+                <h3 class="card-nome">${p.nome}</h3>
+                <div class="card-preco">
+                    <span class="card-preco-atual">R$ ${precoAtual}</span>
+                    ${precoAntigoHtml}
+                </div>
+                <button class="btn-add-cart" data-id="${p.id}">Ver detalhes</button>
+            </div>
+        `;
+
+        // Adiciona evento de clique para redirecionar à página do produto
+        const botao = card.querySelector('.btn-add-cart');
+        botao.addEventListener('click', () => {
+            window.location.href = `produto.html?id=${p.id}`;
+        });
+
+        container.appendChild(card);
+    });
+}
+
+// Inicializa o carregamento ao abrir a página da loja
+carregarProdutos();

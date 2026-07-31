@@ -1,9 +1,9 @@
 // ============================================================
-// CARRINHO.JS - Gestão completa do carrinho de compras
+// CARRINHO.JS - Gestão do carrinho de compras (localStorage)
 // ============================================================
 
 /**
- * Classe Carrinho - gerencia itens, localStorage e interface
+ * Classe Carrinho - gerencia itens, localStorage e UI do modal
  */
 class Carrinho {
     constructor() {
@@ -11,15 +11,14 @@ class Carrinho {
         this.inicializar();
     }
     
-    // Salva o carrinho no localStorage
+    /** Salva o carrinho no localStorage e atualiza UI */
     salvar() {
         localStorage.setItem('bbd_carrinho', JSON.stringify(this.itens));
         this.atualizarUI();
     }
     
-    // Adiciona um produto ao carrinho
+    /** Adiciona um produto ao carrinho */
     adicionar(produto, tamanho, quantidade = 1) {
-        // Procura se já existe este produto com o mesmo tamanho
         const existente = this.itens.find(
             item => item.id === produto.id && item.tamanho === tamanho
         );
@@ -31,23 +30,24 @@ class Carrinho {
                 id: produto.id,
                 nome: produto.nome,
                 preco: produto.preco,
-                imagem: produto.imagens[0],
+                imagem: Array.isArray(produto.imagens) ? produto.imagens[0] : produto.imagem,
                 tamanho: tamanho,
                 quantidade: quantidade
             });
         }
         
         this.salvar();
-        this.abrir(); // Abre o carrinho automaticamente
+        this.abrir();
+        mostrarToast(`${produto.nome} adicionado ao carrinho!`);
     }
     
-    // Remove um item pelo índice
+    /** Remove um item pelo índice */
     remover(indice) {
         this.itens.splice(indice, 1);
         this.salvar();
     }
     
-    // Altera a quantidade de um item
+    /** Altera a quantidade de um item */
     alterarQuantidade(indice, novaQtd) {
         if (novaQtd < 1) {
             this.remover(indice);
@@ -57,23 +57,23 @@ class Carrinho {
         this.salvar();
     }
     
-    // Calcula o subtotal (soma de todos os itens)
+    /** Calcula o subtotal */
     calcularSubtotal() {
         return this.itens.reduce((total, item) => total + (item.preco * item.quantidade), 0);
     }
     
-    // Calcula o total de itens (soma das quantidades)
+    /** Calcula o total de itens (soma das quantidades) */
     calcularTotalItens() {
         return this.itens.reduce((total, item) => total + item.quantidade, 0);
     }
     
-    // Limpa o carrinho
+    /** Limpa o carrinho completamente */
     limpar() {
         this.itens = [];
         this.salvar();
     }
     
-    // Abre o modal do carrinho
+    /** Abre o modal do carrinho */
     abrir() {
         const overlay = document.getElementById('cartOverlay');
         const sidebar = document.getElementById('cartSidebar');
@@ -85,7 +85,7 @@ class Carrinho {
         this.renderizarItens();
     }
     
-    // Fecha o modal do carrinho
+    /** Fecha o modal do carrinho */
     fechar() {
         const overlay = document.getElementById('cartOverlay');
         const sidebar = document.getElementById('cartSidebar');
@@ -96,7 +96,7 @@ class Carrinho {
         }
     }
     
-    // Renderiza os itens na sidebar do carrinho
+    /** Renderiza os itens na sidebar */
     renderizarItens() {
         const container = document.getElementById('cartItemsContainer');
         if (!container) return;
@@ -107,8 +107,7 @@ class Carrinho {
                     <i class="fas fa-shopping-cart"></i>
                     <p>Seu carrinho está vazio</p>
                     <p style="font-size:0.8rem;color:var(--text-muted)">Adicione produtos para continuar</p>
-                </div>
-            `;
+                </div>`;
         } else {
             container.innerHTML = this.itens.map((item, index) => `
                 <div class="cart-item">
@@ -133,7 +132,7 @@ class Carrinho {
         this.atualizarResumo();
     }
     
-    // Atualiza o resumo financeiro no footer do carrinho
+    /** Atualiza o resumo financeiro */
     atualizarResumo() {
         const subtotalEl = document.getElementById('cartSubtotal');
         const totalEl = document.getElementById('cartTotal');
@@ -142,26 +141,20 @@ class Carrinho {
         if (!subtotalEl || !totalEl) return;
         
         const subtotal = this.calcularSubtotal();
-        const freteGratis = subtotal >= 250;
-        
         subtotalEl.textContent = formatarMoeda(subtotal);
-        if (freteEl) {
-            freteEl.textContent = freteGratis ? 'GRÁTIS' : 'A combinar';
-        }
-        totalEl.textContent = formatarMoeda(subtotal); // Total = subtotal (frete a combinar)
+        if (freteEl) freteEl.textContent = subtotal >= 250 ? 'GRÁTIS' : 'A combinar';
+        totalEl.textContent = formatarMoeda(subtotal);
     }
     
-    // Atualiza o contador no ícone da navbar e o botão de finalizar
+    /** Atualiza o contador e o botão de finalizar */
     atualizarUI() {
         this.renderizarItens();
         atualizarContadorCarrinho();
     }
 }
 
-// ---------- INICIALIZAÇÃO DO MODAL DO CARRINHO ----------
-// Injeta o HTML do modal do carrinho no body
+/** Injeta o HTML do modal do carrinho no body */
 function injetarModalCarrinho() {
-    // Verifica se já existe para não duplicar
     if (document.getElementById('cartOverlay')) return;
     
     const modalHTML = `
@@ -187,20 +180,16 @@ function injetarModalCarrinho() {
                     CONTINUAR COMPRANDO
                 </button>
             </div>
-        </div>
-    `;
+        </div>`;
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
-    // Evento para fechar ao clicar no overlay
     document.getElementById('cartOverlay').addEventListener('click', () => {
         window.carrinho.fechar();
     });
 }
 
-/**
- * Redireciona para a página de checkout
- */
+/** Redireciona para a página de checkout */
 function irParaCheckout() {
     if (window.carrinho.itens.length === 0) {
         alert('Seu carrinho está vazio!');
@@ -210,9 +199,7 @@ function irParaCheckout() {
     window.location.href = 'checkout.html';
 }
 
-/**
- * Atualiza o contador de itens no ícone do carrinho da navbar
- */
+/** Atualiza o contador de itens no ícone do carrinho */
 function atualizarContadorCarrinho() {
     const contador = document.getElementById('cartCount');
     if (!contador) return;
@@ -220,83 +207,32 @@ function atualizarContadorCarrinho() {
     const total = window.carrinho ? window.carrinho.calcularTotalItens() : 0;
     contador.textContent = total;
     contador.style.display = total > 0 ? 'flex' : 'none';
-    
-    // Efeito de pulsar quando o número muda
     contador.classList.add('pulse');
     setTimeout(() => contador.classList.remove('pulse'), 400);
 }
 
-/**
- * Função global para adicionar ao carrinho (chamada pelos botões)
- */
-function adicionarAoCarrinho(produtoId, tamanho) {
-    const produtos = obterProdutos();
-    const produto = produtos.find(p => p.id === produtoId);
-    
-    if (!produto) {
-        alert('Produto não encontrado!');
-        return;
-    }
-    
+/** Função global para adicionar ao carrinho a partir de qualquer página */
+async function adicionarAoCarrinho(produtoId, tamanho) {
     if (!tamanho) {
         alert('Por favor, selecione um tamanho!');
         return;
     }
     
+    const produto = await obterProdutoPorId(produtoId);
+    if (!produto) {
+        alert('Produto não encontrado!');
+        return;
+    }
+    
     window.carrinho.adicionar(produto, tamanho);
-    
-    // Feedback visual rápido (opcional: toast)
-    mostrarToast(`${produto.nome} adicionado ao carrinho!`);
 }
 
-/**
- * Exibe um toast de feedback
- */
-function mostrarToast(mensagem) {
-    // Remove toast existente
-    const existente = document.querySelector('.toast-msg');
-    if (existente) existente.remove();
-    
-    const toast = document.createElement('div');
-    toast.className = 'toast-msg';
-    toast.textContent = mensagem;
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--neon);
-        color: #fff;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-family: var(--font-display);
-        font-size: 0.8rem;
-        letter-spacing: 1px;
-        z-index: 9999;
-        box-shadow: 0 0 20px var(--neon-glow);
-        animation: fadeInUp 0.3s ease, fadeOut 0.3s ease 2s forwards;
-    `;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.remove(), 2500);
-}
-
-// Adiciona keyframes para o toast se não existirem
-const toastStyle = document.createElement('style');
-toastStyle.textContent = `
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-        to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-    @keyframes fadeOut {
-        to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-    }
-`;
-document.head.appendChild(toastStyle);
-
-// ========== INICIALIZAÇÃO ==========
+// Inicialização ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
     injetarModalCarrinho();
     window.carrinho = new Carrinho();
     atualizarContadorCarrinho();
 });
+
+window.irParaCheckout = irParaCheckout;
+window.adicionarAoCarrinho = adicionarAoCarrinho;

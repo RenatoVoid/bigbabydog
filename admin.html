@@ -1,6 +1,6 @@
 <!-- ============================================================
-     ADMIN.HTML - Painel administrativo protegido por senha
-     Gerenciar produtos, pedidos, upload de imagens via URL
+     ADMIN.HTML - Painel Administrativo BIGBABYDOG
+     Login, CRUD de produtos, lista de pedidos
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -17,7 +17,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Estilos -->
+    <!-- Estilos globais -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -27,11 +27,15 @@
         <div class="admin-login-box">
             <i class="fas fa-lock" style="font-size:3rem;color:var(--neon);margin-bottom:20px;"></i>
             <h2 style="font-family:var(--font-display);color:#fff;margin-bottom:10px;">PAINEL ADMIN</h2>
-            <p style="color:var(--text-muted);margin-bottom:20px;">Digite a senha para acessar</p>
+            <p style="color:var(--text-muted);margin-bottom:20px;">Faça login para acessar</p>
+            <input type="email" id="adminEmail" placeholder="EMAIL" value="admin@bigbabydog.com" style="margin-bottom:10px;">
             <input type="password" id="adminSenha" placeholder="SENHA" autofocus>
-            <button class="btn btn-primary" onclick="verificarSenha()" style="width:100%;margin-top:10px;">
-                ACESSAR
+            <button class="btn btn-primary" id="btnAdminLogin" style="width:100%;margin-top:10px;">
+                <i class="fas fa-sign-in-alt"></i> ACESSAR
             </button>
+            <p style="margin-top:15px;font-size:0.75rem;color:var(--text-muted);">
+                Área restrita a administradores
+            </p>
         </div>
     </div>
 
@@ -44,14 +48,16 @@
                 <i class="fas fa-dog"></i> BIGBABYDOG <span style="font-size:0.7rem;color:var(--danger)">ADMIN</span>
             </a>
             <ul class="nav-links">
-                <li><a href="index.html">Ver Site</a></li>
-                <li><a href="#" onclick="sairAdmin()">Sair</a></li>
+                <li><a href="index.html" target="_blank">Ver Site</a></li>
+                <li><a href="#" onclick="window.fazerLogout()" style="color:var(--danger);">Sair</a></li>
             </ul>
         </nav>
 
         <!-- Conteúdo do Painel -->
         <main class="admin-panel">
-            <h1 style="font-family:var(--font-display);margin-bottom:20px;">PAINEL DE <span style="color:var(--neon);">CONTROLE</span></h1>
+            <h1 style="font-family:var(--font-display);margin-bottom:20px;">
+                PAINEL DE <span style="color:var(--neon);">CONTROLE</span>
+            </h1>
             
             <!-- Abas -->
             <div class="admin-tabs">
@@ -59,21 +65,23 @@
                 <button class="admin-tab" data-tab="pedidos">🛒 PEDIDOS</button>
             </div>
             
-            <!-- Seção Produtos -->
+            <!-- ========== SEÇÃO PRODUTOS ========== -->
             <div class="admin-section active" id="section-produtos">
                 
-                <!-- Formulário Adicionar/Editar Produto -->
+                <!-- ========== FORMULÁRIO DE PRODUTO ========== -->
                 <div class="admin-form" id="formProduto">
-                    <h3 style="font-family:var(--font-display);margin-bottom:16px;">ADICIONAR / EDITAR PRODUTO</h3>
+                    <h3 style="font-family:var(--font-display);margin-bottom:16px;" id="formTitulo">
+                        ADICIONAR NOVO PRODUTO
+                    </h3>
                     <input type="hidden" id="prodId">
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Nome do Produto *</label>
-                            <input type="text" id="prodNome" required>
+                            <label for="prodNome">Nome do Produto *</label>
+                            <input type="text" id="prodNome" placeholder="Ex: Camiseta Caveira" required>
                         </div>
                         <div class="form-group">
-                            <label>Categoria *</label>
+                            <label for="prodCategoria">Categoria *</label>
                             <select id="prodCategoria" required>
                                 <option value="">Selecione...</option>
                                 <option value="camiseta">Camiseta</option>
@@ -87,55 +95,80 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Preço (R$) *</label>
-                            <input type="number" id="prodPreco" step="0.01" min="0" required>
+                            <label for="prodPreco">Preço (R$) *</label>
+                            <input type="number" id="prodPreco" step="0.01" min="0" placeholder="89.90" required>
                         </div>
                         <div class="form-group">
-                            <label>Preço Antigo (se promoção)</label>
-                            <input type="number" id="prodPrecoAntigo" step="0.01" min="0">
+                            <label for="prodPrecoAntigo">Preço Antigo (promoção)</label>
+                            <input type="number" id="prodPrecoAntigo" step="0.01" min="0" placeholder="129.90">
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label>Descrição</label>
-                        <textarea id="prodDescricao" rows="3"></textarea>
+                        <label for="prodDescricao">Descrição</label>
+                        <textarea id="prodDescricao" rows="3" placeholder="Descreva o produto..."></textarea>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Imagem Principal (URL)</label>
-                            <input type="url" id="prodImg1" placeholder="https://placehold.co/600x800/...">
-                        </div>
-                        <div class="form-group">
-                            <label>Imagem 2 (URL)</label>
-                            <input type="url" id="prodImg2" placeholder="https://...">
-                        </div>
-                        <div class="form-group">
-                            <label>Imagem 3 (URL)</label>
-                            <input type="url" id="prodImg3" placeholder="https://...">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tamanhos (separados por vírgula)</label>
-                            <input type="text" id="prodTamanhos" placeholder="P, M, G, GG" value="P, M, G, GG">
-                        </div>
-                        <div class="form-group" style="display:flex;align-items:flex-end;gap:20px;padding-bottom:16px;">
-                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                                <input type="checkbox" id="prodDestaque"> Destaque
+                    <div class="form-group">
+                        <label>Tamanhos Disponíveis *</label>
+                        <div style="display:flex;gap:15px;margin-top:8px;">
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-primary);">
+                                <input type="checkbox" class="tamanho-checkbox" value="P" checked> P
                             </label>
-                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                                <input type="checkbox" id="prodNovo"> Novo
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-primary);">
+                                <input type="checkbox" class="tamanho-checkbox" value="M" checked> M
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-primary);">
+                                <input type="checkbox" class="tamanho-checkbox" value="G" checked> G
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-primary);">
+                                <input type="checkbox" class="tamanho-checkbox" value="GG" checked> GG
                             </label>
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">💾 SALVAR PRODUTO</button>
+                    <div class="form-group">
+                        <label for="prodImagemUpload">Upload de Imagem</label>
+                        <input type="file" id="prodImagemUpload" accept="image/*" style="padding:8px;">
+                        <small style="color:var(--text-muted);display:block;margin-top:4px;">
+                            Formatos aceitos: JPG, PNG, WebP. Tamanho máximo: 5MB
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="prodImagemUrl">OU URL da Imagem</label>
+                        <input type="url" id="prodImagemUrl" placeholder="https://exemplo.com/imagem.jpg">
+                        <small style="color:var(--text-muted);display:block;margin-top:4px;">
+                            Se ambos forem preenchidos, o upload terá prioridade
+                        </small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-primary);">
+                                <input type="checkbox" id="prodDestaque"> Produto em Destaque
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-primary);">
+                                <input type="checkbox" id="prodNovo"> Marcar como Novo
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button type="submit" class="btn btn-primary" id="btnSalvarProduto">
+                            💾 SALVAR PRODUTO
+                        </button>
+                        <button type="button" class="btn btn-outline" id="btnCancelarEdicao" 
+                                onclick="window.limparFormularioProduto?.()" style="display:none;">
+                            CANCELAR EDIÇÃO
+                        </button>
+                    </div>
                 </div>
                 
-                <!-- Tabela de Produtos -->
-                <h3 style="font-family:var(--font-display);margin:30px 0 16px;">TODOS OS PRODUTOS</h3>
+                <!-- Tabela de Produtos Cadastrados -->
+                <h3 style="font-family:var(--font-display);margin:30px 0 16px;">PRODUTOS CADASTRADOS</h3>
                 <div style="overflow-x:auto;">
                     <table class="admin-table">
                         <thead>
@@ -149,13 +182,13 @@
                             </tr>
                         </thead>
                         <tbody id="adminProdutosTbody">
-                            <!-- Preenchido via JS -->
+                            <tr><td colspan="6" style="text-align:center;padding:20px;">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- Seção Pedidos -->
+            <!-- ========== SEÇÃO PEDIDOS ========== -->
             <div class="admin-section" id="section-pedidos">
                 <h3 style="font-family:var(--font-display);margin-bottom:20px;">PEDIDOS RECEBIDOS</h3>
                 <div style="overflow-x:auto;">
@@ -170,7 +203,7 @@
                             </tr>
                         </thead>
                         <tbody id="adminPedidosTbody">
-                            <!-- Preenchido via JS -->
+                            <tr><td colspan="5" style="text-align:center;padding:20px;">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -185,20 +218,6 @@
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
-    <script src="js/dados.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/carrinho.js"></script>
-    <script src="js/admin.js"></script>
-    
-    <script>
-        /**
-         * Função para sair do painel admin
-         */
-        function sairAdmin() {
-            sessionStorage.removeItem('bbd_admin_auth');
-            window.location.reload();
-        }
-    </script>
-
+    <script type="module" src="js/admin.js"></script>
 </body>
 </html>

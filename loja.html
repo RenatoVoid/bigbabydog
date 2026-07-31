@@ -1,5 +1,6 @@
 <!-- ============================================================
-     LOJA.HTML - Catálogo de produtos com filtros, busca e grid
+     LOJA.HTML - Catálogo de produtos BIGBABYDOG
+     Grid responsivo, carregamento dinâmico via Supabase
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -8,15 +9,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loja - BIGBABYDOG</title>
     
-    <!-- Fontes Google -->
+    <!-- Fontes Google (Orbitron + Rajdhani) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome -->
+    <!-- Ícones Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Estilos -->
+    <!-- Estilos globais (cyberpunk) -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -36,6 +37,7 @@
             <li><a href="loja.html" class="active">Loja</a></li>
             <li><a href="index.html#sobre">Sobre</a></li>
             <li>
+                <!-- Botão do carrinho (aciona o modal via função global) -->
                 <button class="nav-cart" onclick="window.carrinho.abrir()" aria-label="Carrinho">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cartCount" style="display:none">0</span>
@@ -48,30 +50,13 @@
     <main style="padding: 100px 20px 60px;">
         <div class="container">
             
-            <!-- Título -->
+            <!-- Título da seção -->
             <h1 class="section-title" style="text-align:left;">NOSSA <span>COLEÇÃO</span></h1>
             
-            <!-- Barra de Filtros -->
-            <div class="filtros-bar">
-                <button class="filtro-btn active" data-categoria="todos">TODOS</button>
-                <button class="filtro-btn" data-categoria="camiseta">CAMISETAS</button>
-                <button class="filtro-btn" data-categoria="calca">CALÇAS</button>
-                <button class="filtro-btn" data-categoria="moletom">MOLETONS</button>
-                <button class="filtro-btn" data-categoria="tenis">TÊNIS</button>
-                <button class="filtro-btn" data-categoria="acessorio">ACESSÓRIOS</button>
-                <input type="text" class="busca-input" id="buscaInput" placeholder="🔍 Buscar produto...">
-            </div>
-            
-            <!-- Grid de Produtos -->
-            <div class="produtos-grid" id="lojaGrid">
-                <!-- Preenchido dinamicamente via JavaScript -->
-            </div>
-            
-            <!-- Mensagem de nenhum resultado -->
-            <div id="semResultados" style="display:none; text-align:center; padding: 60px 20px; color: var(--text-muted);">
-                <i class="fas fa-search" style="font-size:3rem; display:block; margin-bottom:15px;"></i>
-                <p style="font-family:var(--font-display); font-size:1.2rem;">Nenhum produto encontrado</p>
-                <p>Tente outros filtros ou termos de busca.</p>
+            <!-- Container onde os cards de produtos serão injetados -->
+            <div id="lista-produtos" class="produtos-grid">
+                <!-- Mensagem temporária enquanto carrega -->
+                <p style="text-align:center;color:var(--text-muted);grid-column:1/-1;">Carregando produtos...</p>
             </div>
             
         </div>
@@ -87,122 +72,8 @@
         <p>© 2024 BIGBABYDOG - Todos os direitos reservados</p>
     </footer>
 
-    <!-- ========== SCRIPTS ========== -->
-    <script src="js/dados.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/carrinho.js"></script>
-    
-    <script>
-        /**
-         * LOJA.JS - Lógica de filtros, busca e renderização do catálogo
-         */
-        
-        let filtroAtual = 'todos';
-        let buscaAtual = '';
-        
-        /**
-         * Carrega e renderiza os produtos no grid da loja
-         * Aplica filtro de categoria e termo de busca
-         */
-        function carregarLoja() {
-            const grid = document.getElementById('lojaGrid');
-            const semResultados = document.getElementById('semResultados');
-            if (!grid) return;
-            
-            // Obtém todos os produtos (originais + customizados do admin)
-            const todosProdutos = obterProdutos();
-            
-            // Filtra por categoria
-            let produtosFiltrados = todosProdutos;
-            if (filtroAtual !== 'todos') {
-                produtosFiltrados = todosProdutos.filter(p => p.categoria === filtroAtual);
-            }
-            
-            // Filtra por termo de busca
-            if (buscaAtual.trim() !== '') {
-                const termo = buscaAtual.toLowerCase().trim();
-                produtosFiltrados = produtosFiltrados.filter(p => 
-                    p.nome.toLowerCase().includes(termo) ||
-                    p.categoria.toLowerCase().includes(termo) ||
-                    p.descricao.toLowerCase().includes(termo)
-                );
-            }
-            
-            // Exibe mensagem se não encontrou nada
-            if (produtosFiltrados.length === 0) {
-                grid.innerHTML = '';
-                semResultados.style.display = 'block';
-                return;
-            }
-            
-            semResultados.style.display = 'none';
-            
-            // Renderiza os cards de produtos
-            grid.innerHTML = produtosFiltrados.map(produto => `
-                <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${produto.id}'">
-                    ${produto.novo ? '<span class="card-badge badge-novo">Novo</span>' : ''}
-                    ${produto.precoAntigo ? '<span class="card-badge badge-promo">-${calcularDesconto(produto)}%</span>' : ''}
-                    <img src="${produto.imagens[0]}" alt="${produto.nome}" class="card-img" loading="lazy">
-                    <div class="card-body">
-                        <div class="card-categoria">${produto.categoria}</div>
-                        <div class="card-nome">${produto.nome}</div>
-                        <div class="card-preco">
-                            <span class="card-preco-atual">${formatarMoeda(produto.preco)}</span>
-                            ${produto.precoAntigo ? `<span class="card-preco-antigo">${formatarMoeda(produto.precoAntigo)}</span>` : ''}
-                        </div>
-                        <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='produto.html?id=${produto.id}'">
-                            <i class="fas fa-shopping-bag"></i> COMPRAR
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        /**
-         * Calcula a porcentagem de desconto
-         */
-        function calcularDesconto(produto) {
-            if (!produto.precoAntigo) return 0;
-            const desconto = ((produto.precoAntigo - produto.preco) / produto.precoAntigo) * 100;
-            return Math.round(desconto);
-        }
-        
-        /**
-         * Configura os eventos dos filtros e busca
-         */
-        function configurarFiltros() {
-            // Botões de categoria
-            const botoesFiltro = document.querySelectorAll('.filtro-btn');
-            botoesFiltro.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // Remove active de todos
-                    botoesFiltro.forEach(b => b.classList.remove('active'));
-                    // Adiciona active no clicado
-                    btn.classList.add('active');
-                    // Atualiza filtro e recarrega
-                    filtroAtual = btn.dataset.categoria;
-                    carregarLoja();
-                });
-            });
-            
-            // Campo de busca (com debounce para melhor performance)
-            const buscaInput = document.getElementById('buscaInput');
-            let debounceTimer;
-            buscaInput.addEventListener('input', () => {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    buscaAtual = buscaInput.value;
-                    carregarLoja();
-                }, 300);
-            });
-        }
-        
-        // Inicializa quando o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarLoja();
-            configurarFiltros();
-        });
-    </script>
-
+    <!-- ========== SCRIPT PRINCIPAL (módulo ES) ========== -->
+    <!-- O main.js contém a função carregarProdutos() que alimenta #lista-produtos -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

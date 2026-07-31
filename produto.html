@@ -1,6 +1,6 @@
 <!-- ============================================================
      PRODUTO.HTML - Página individual do produto
-     Galeria, seletor de tamanho, botão comprar e sugestões
+     Carrega dados do Supabase, galeria, seletor de tamanho
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -106,90 +106,104 @@
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
-    <script src="js/dados.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/carrinho.js"></script>
-    
-    <script>
-        /**
-         * PRODUTO.JS - Lógica da página de produto
-         * Carrega detalhes, galeria, seletor de tamanho e sugestões
-         */
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
+        const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        await import('./js/main.js');
+        await import('./js/carrinho.js');
+        
+        // ---------- ESTADO ----------
         let produtoAtual = null;
         let tamanhoSelecionado = null;
         
         /**
-         * Obtém o ID do produto da URL (?id=1)
+         * Obtém o ID do produto da URL
          */
         function obterIdDaURL() {
             const params = new URLSearchParams(window.location.search);
-            return parseInt(params.get('id')) || 1; // default: produto 1
+            return parseInt(params.get('id')) || null;
         }
         
         /**
-         * Carrega os dados do produto e renderiza a página
+         * Carrega os dados do produto do Supabase
          */
-        function carregarProduto() {
+        async function carregarProduto() {
             const id = obterIdDaURL();
-            const produtos = obterProdutos();
-            produtoAtual = produtos.find(p => p.id === id);
-            
-            // Se não encontrar, redireciona para a loja
-            if (!produtoAtual) {
+            if (!id) {
                 window.location.href = 'loja.html';
                 return;
             }
             
-            // Atualiza título da página
-            document.title = `${produtoAtual.nome} - BIGBABYDOG`;
+            const { data: produto, error } = await window.supabase
+                .from('produtos')
+                .select('*')
+                .eq('id', id)
+                .single();
+            
+            if (error || !produto) {
+                window.location.href = 'loja.html';
+                return;
+            }
+            
+            produtoAtual = produto;
+            document.title = `${produto.nome} - BIGBABYDOG`;
             
             // Preenche informações
-            document.getElementById('produtoNome').textContent = produtoAtual.nome;
-            document.getElementById('produtoCategoria').textContent = produtoAtual.categoria;
-            document.getElementById('produtoPreco').textContent = formatarMoeda(produtoAtual.preco);
-            document.getElementById('produtoDescricao').textContent = produtoAtual.descricao;
+            document.getElementById('produtoNome').textContent = produto.nome;
+            document.getElementById('produtoCategoria').textContent = produto.categoria;
+            document.getElementById('produtoPreco').textContent = formatarMoeda(produto.preco);
+            document.getElementById('produtoDescricao').textContent = produto.descricao || 'Sem descrição disponível.';
             
-            // Preço antigo (se houver promoção)
-            if (produtoAtual.precoAntigo) {
-                document.getElementById('produtoPrecoAntigo').textContent = formatarMoeda(produtoAtual.precoAntigo);
+            // Preço antigo (promoção)
+            if (produto.preco_antigo) {
+                document.getElementById('produtoPrecoAntigo').textContent = formatarMoeda(produto.preco_antigo);
                 document.getElementById('produtoPrecoAntigo').style.display = 'inline';
             }
             
             // Badges
             const badgesContainer = document.getElementById('produtoBadges');
             let badges = '';
-            if (produtoAtual.novo) badges += '<span class="card-badge badge-novo" style="position:static;display:inline-block;margin-right:8px;">Novo</span>';
-            if (produtoAtual.precoAntigo) {
-                const desconto = Math.round(((produtoAtual.precoAntigo - produtoAtual.preco) / produtoAtual.precoAntigo) * 100);
+            if (produto.novo) badges += '<span class="card-badge badge-novo" style="position:static;display:inline-block;margin-right:8px;">Novo</span>';
+            if (produto.preco_antigo) {
+                const desconto = Math.round(((produto.preco_antigo - produto.preco) / produto.preco_antigo) * 100);
                 badges += `<span class="card-badge badge-promo" style="position:static;display:inline-block;">-${desconto}%</span>`;
             }
             badgesContainer.innerHTML = badges;
             
             // Renderiza galeria
-            renderizarGaleria();
+            renderizarGaleria(produto);
             
             // Renderiza seletor de tamanho
-            renderizarTamanhos();
+            renderizarTamanhos(produto.tamanhos || ['P', 'M', 'G', 'GG']);
             
             // Carrega sugestões
-            carregarSugestoes();
+            carregarSugestoes(produto);
         }
         
         /**
-         * Renderiza a galeria de imagens do produto
+         * Renderiza a galeria de imagens
          */
-        function renderizarGaleria() {
+        function renderizarGaleria(produto) {
             const principal = document.getElementById('galeriaPrincipal');
             const thumbsContainer = document.getElementById('galeriaThumbs');
             
-            principal.src = produtoAtual.imagens[0];
-            principal.alt = produtoAtual.nome;
+            // Cria array de imagens (principal + extras)
+            const imagens = [produto.imagem || 'https://placehold.co/600x800/1a1a2e/b366ff?text=' + encodeURIComponent(produto.nome)];
+            if (produto.imagens && Array.isArray(produto.imagens)) {
+                imagens.push(...produto.imagens);
+            }
             
-            thumbsContainer.innerHTML = produtoAtual.imagens.map((img, index) => `
+            principal.src = imagens[0];
+            principal.alt = produto.nome;
+            
+            thumbsContainer.innerHTML = imagens.map((img, index) => `
                 <img 
                     src="${img}" 
-                    alt="${produtoAtual.nome} - Imagem ${index + 1}" 
+                    alt="${produto.nome} - Imagem ${index + 1}" 
                     class="${index === 0 ? 'active' : ''}"
                     onclick="trocarImagemPrincipal('${img}', this)"
                     loading="lazy"
@@ -202,8 +216,6 @@
          */
         function trocarImagemPrincipal(src, thumbElement) {
             document.getElementById('galeriaPrincipal').src = src;
-            
-            // Atualiza a classe active nas miniaturas
             document.querySelectorAll('.galeria-thumbs img').forEach(img => {
                 img.classList.remove('active');
             });
@@ -213,10 +225,9 @@
         /**
          * Renderiza os botões de seleção de tamanho
          */
-        function renderizarTamanhos() {
+        function renderizarTamanhos(tamanhos) {
             const container = document.getElementById('tamanhoOpcoes');
-            
-            container.innerHTML = produtoAtual.tamanhos.map(tamanho => `
+            container.innerHTML = tamanhos.map(tamanho => `
                 <button class="tamanho-btn" data-tamanho="${tamanho}" onclick="selecionarTamanho('${tamanho}', this)">
                     ${tamanho}
                 </button>
@@ -227,54 +238,37 @@
          * Seleciona um tamanho e habilita o botão de compra
          */
         function selecionarTamanho(tamanho, elemento) {
-            // Remove seleção anterior
-            document.querySelectorAll('.tamanho-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // Seleciona o novo
+            document.querySelectorAll('.tamanho-btn').forEach(btn => btn.classList.remove('selected'));
             elemento.classList.add('selected');
             tamanhoSelecionado = tamanho;
             
-            // Habilita o botão de compra
             const btnComprar = document.getElementById('btnComprar');
             btnComprar.disabled = false;
             btnComprar.innerHTML = `<i class="fas fa-shopping-cart"></i> ADICIONAR AO CARRINHO - ${formatarMoeda(produtoAtual.preco)}`;
         }
         
         /**
-         * Carrega produtos sugeridos (aleatórios da mesma categoria ou geral)
+         * Carrega produtos sugeridos (mesma categoria)
          */
-        function carregarSugestoes() {
+        async function carregarSugestoes(produtoAtual) {
             const grid = document.getElementById('sugestoesGrid');
             if (!grid) return;
             
-            const todos = obterProdutos();
+            const { data: sugestoes, error } = await window.supabase
+                .from('produtos')
+                .select('*')
+                .eq('categoria', produtoAtual.categoria)
+                .neq('id', produtoAtual.id)
+                .limit(4);
             
-            // Filtra: mesma categoria, mas produto diferente
-            let sugestoes = todos.filter(p => 
-                p.id !== produtoAtual.id && p.categoria === produtoAtual.categoria
-            );
-            
-            // Se não tiver 3 sugestões da mesma categoria, completa com outros
-            if (sugestoes.length < 3) {
-                const outros = todos.filter(p => 
-                    p.id !== produtoAtual.id && p.categoria !== produtoAtual.categoria
-                );
-                // Embaralha e pega o necessário
-                outros.sort(() => Math.random() - 0.5);
-                sugestoes = [...sugestoes, ...outros].slice(0, 4);
-            } else {
-                // Embaralha e pega 4
-                sugestoes.sort(() => Math.random() - 0.5);
-                sugestoes = sugestoes.slice(0, 4);
+            if (error || !sugestoes || sugestoes.length === 0) {
+                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Nenhuma sugestão disponível</p>';
+                return;
             }
             
             grid.innerHTML = sugestoes.map(produto => `
                 <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${produto.id}'">
-                    ${produto.novo ? '<span class="card-badge badge-novo">Novo</span>' : ''}
-                    ${produto.precoAntigo ? '<span class="card-badge badge-promo">Promo</span>' : ''}
-                    <img src="${produto.imagens[0]}" alt="${produto.nome}" class="card-img" loading="lazy">
+                    <img src="${produto.imagem || 'https://placehold.co/600x800/1a1a2e/b366ff?text=' + encodeURIComponent(produto.nome)}" alt="${produto.nome}" class="card-img" loading="lazy">
                     <div class="card-body">
                         <div class="card-categoria">${produto.categoria}</div>
                         <div class="card-nome">${produto.nome}</div>
@@ -286,7 +280,11 @@
             `).join('');
         }
         
-        // ========== INICIALIZAÇÃO ==========
+        // Funções globais necessárias
+        window.trocarImagemPrincipal = trocarImagemPrincipal;
+        window.selecionarTamanho = selecionarTamanho;
+        
+        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             carregarProduto();
             
@@ -297,7 +295,6 @@
                     alert('Por favor, selecione um tamanho antes de comprar!');
                     return;
                 }
-                
                 adicionarAoCarrinho(produtoAtual.id, tamanhoSelecionado);
             });
         });

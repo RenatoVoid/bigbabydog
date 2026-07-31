@@ -183,10 +183,17 @@
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
-    <script src="js/dados.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/carrinho.js"></script>
-    <script src="js/checkout.js"></script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        await import('./js/main.js');
+        await import('./js/carrinho.js');
+        await import('./js/checkout.js');
+    </script>
 
 </body>
 </html>
