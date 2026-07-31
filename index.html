@@ -1,140 +1,140 @@
+<!-- ============================================================
+     INDEX.HTML - Página Principal da BIGBABYDOG
+     Landing page com hero, drops em destaque, sobre e footer
+     ============================================================ -->
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIGBABYDOG - Moda Urbana Cyberpunk</title>
     
-    <!-- SEO -->
-    <title>BIGBABY DOG - Streetwear & College</title>
-    <meta name="description" content="BIGBABY DOG - Catálogo de roupas streetwear e estilo college. Confira nossa coleção.">
-    <meta name="theme-color" content="#0f0f0f">
-    
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="imagens/logo/logo.png" type="image/x-icon">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="styles/style.css">
+    <!-- Fontes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐕</text></svg>">
 </head>
 <body>
-    <!-- ========== OVERLAY ========== -->
-    <div class="overlay" id="overlay"></div>
 
-    <!-- ========== MENU LATERAL ========== -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2 class="sidebar-logo">
-                <img src="imagens/logo/logo.png" alt="BIGBABY DOG" class="sidebar-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                <span style="display:none;"> BIGBABY DOG</span>
-            </h2>
-            <button class="sidebar-close" id="sidebar-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <i class="fas fa-dog"></i> BIGBABYDOG
+        </a>
         
-        <nav class="sidebar-nav">
-            <!-- Menu principal -->
-            <ul class="sidebar-menu">
-                <li><a href="#home" class="sidebar-link sidebar-home" data-page="home">🏠 Início</a></li>
-            </ul>
-            
-            <!-- Categorias -->
-            <div class="sidebar-categories">
-                <h3 class="sidebar-title">Categorias</h3>
-                <ul class="sidebar-menu">
-                    <li>
-                        <a href="#camisetas" class="sidebar-link" data-page="camisetas">
-                            <i class="fas fa-tshirt"></i> Camisetas
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#blusas" class="sidebar-link" data-page="blusas">
-                            <i class="fas fa-vest"></i> Blusas
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#corta-vento" class="sidebar-link" data-page="corta-vento">
-                            <i class="fas fa-wind"></i> Corta Vento
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#jaquetas" class="sidebar-link" data-page="jaquetas">
-                            <i class="fas fa-user-tie"></i> Jaquetas
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#calcas" class="sidebar-link" data-page="calcas">
-                            <i class="fas fa-socks"></i> Calças
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#acessorios" class="sidebar-link" data-page="acessorios">
-                            <i class="fas fa-gem"></i> Acessórios
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            
-            <!-- Páginas -->
-            <div class="sidebar-pages">
-                <h3 class="sidebar-title">Mais</h3>
-                <ul class="sidebar-menu">
-                    <li>
-                        <a href="#contato" class="sidebar-link" data-page="contato">
-                            <i class="fas fa-envelope"></i> Contato
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        <button class="menu-toggle" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
         
-        <div class="sidebar-footer">
-            <a href="https://instagram.com/renato._.dtk" target="_blank" class="sidebar-social">
-                <i class="fab fa-instagram"></i> @renato._.dtk
-            </a>
-        </div>
-    </aside>
-
-    <!-- ========== HEADER ========== -->
-    <header class="header" id="header">
-        <div class="container">
-            <div class="header-content">
-                <button class="hamburger" id="hamburger" aria-label="Abrir menu">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="loja.html">Loja</a></li>
+            <li><a href="index.html#sobre">Sobre</a></li>
+            <li>
+                <button class="nav-cart" onclick="window.carrinho.abrir()" aria-label="Carrinho">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount" style="display:none">0</span>
                 </button>
-                
-                <a href="#home" class="header-logo" data-page="home">
-                    <img src="imagens/logo.png" alt="BIGBABY DOG" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <span class="logo-text" style="display:none;"> BIGBABY DOG</span>
-                </a>
-            </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- ========== HERO SECTION ========== -->
+    <header class="hero">
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <h1>BIGBABYDOG</h1>
+            <p>ESTILO URBANO E ATITUDE</p>
+            <a href="loja.html" class="hero-btn">
+                <i class="fas fa-bolt"></i> VER COLEÇÃO
+            </a>
         </div>
     </header>
 
-    <!-- ========== CONTEÚDO PRINCIPAL (Trocado via JS) ========== -->
-    <main id="main-content">
-        <!-- O conteúdo será renderizado dinamicamente -->
-    </main>
+    <!-- ========== DROPS EM DESTAQUE ========== -->
+    <section class="container" style="padding: 60px 20px;">
+        <h2 class="section-title"><span>🔥</span> DROP ATUAL <span>🔥</span></h2>
+        <div class="produtos-grid" id="destaquesGrid">
+            <!-- Preenchido via JavaScript com produtos em destaque -->
+        </div>
+        <div style="text-align:center; margin-top: 40px;">
+            <a href="loja.html" class="btn btn-outline">VER TODOS OS PRODUTOS <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </section>
+
+    <!-- ========== SEÇÃO SOBRE ========== -->
+    <section id="sobre" class="sobre">
+        <h2 class="section-title">SOBRE A <span>MARCA</span></h2>
+        <p>
+            A BIGBABYDOG nasceu nas ruas, alimentada pela energia pulsante da cultura urbana e 
+            pela estética cyberpunk. Cada peça é desenhada para quem vive o agora, sem medo de 
+            expressar sua individualidade. Do asfalto ao digital, vestimos a atitude de uma 
+            nova geração. <strong>Não seguimos tendências, criamos as nossas.</strong>
+        </p>
+    </section>
 
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
-        <div class="container">
-            <p> BIGBABY DOG © 2024 - Todos os direitos reservados</p>
+        <div class="social-icons">
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
         </div>
+        <p>© 2024 BIGBABYDOG - Todos os direitos reservados</p>
+        <p style="margin-top:4px;font-size:0.75rem">contato@bigbabydog.com | WhatsApp: (11) 99999-9999</p>
     </footer>
 
-    <!-- ========== MODAL ========== -->
-    <div class="modal" id="image-modal">
-        <span class="modal-close" id="modal-close">&times;</span>
-        <img src="" alt="Visualização do produto" id="modal-image">
-        <div class="modal-info" id="modal-info"></div>
-    </div>
+    <!-- ========== SCRIPTS ========== -->
+    <script src="js/dados.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/carrinho.js"></script>
+    
+    <script>
+        /**
+         * Carrega os produtos em destaque na home
+         */
+        function carregarDestaques() {
+            const grid = document.getElementById('destaquesGrid');
+            if (!grid) return;
+            
+            const produtos = obterProdutos();
+            const destaques = produtos.filter(p => p.destaque);
+            
+            grid.innerHTML = destaques.map(produto => `
+                <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${produto.id}'">
+                    ${produto.novo ? '<span class="card-badge badge-novo">Novo</span>' : ''}
+                    ${produto.precoAntigo ? '<span class="card-badge badge-promo">Promo</span>' : ''}
+                    <img src="${produto.imagens[0]}" alt="${produto.nome}" class="card-img" loading="lazy">
+                    <div class="card-body">
+                        <div class="card-categoria">${produto.categoria}</div>
+                        <div class="card-nome">${produto.nome}</div>
+                        <div class="card-preco">
+                            <span class="card-preco-atual">${formatarMoeda(produto.preco)}</span>
+                            ${produto.precoAntigo ? `<span class="card-preco-antigo">${formatarMoeda(produto.precoAntigo)}</span>` : ''}
+                        </div>
+                        <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='produto.html?id=${produto.id}'">
+                            <i class="fas fa-shopping-bag"></i> COMPRAR
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Inicializa quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarDestaques();
+        });
+    </script>
 
-    <!-- JavaScript -->
-    <script src="scripts/main.js"></script>
 </body>
 </html>

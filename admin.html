@@ -1,0 +1,204 @@
+<!-- ============================================================
+     ADMIN.HTML - Painel administrativo protegido por senha
+     Gerenciar produtos, pedidos, upload de imagens via URL
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - BIGBABYDOG</title>
+    
+    <!-- Fontes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ========== TELA DE LOGIN ========== -->
+    <div class="admin-login-overlay" id="adminLoginOverlay">
+        <div class="admin-login-box">
+            <i class="fas fa-lock" style="font-size:3rem;color:var(--neon);margin-bottom:20px;"></i>
+            <h2 style="font-family:var(--font-display);color:#fff;margin-bottom:10px;">PAINEL ADMIN</h2>
+            <p style="color:var(--text-muted);margin-bottom:20px;">Digite a senha para acessar</p>
+            <input type="password" id="adminSenha" placeholder="SENHA" autofocus>
+            <button class="btn btn-primary" onclick="verificarSenha()" style="width:100%;margin-top:10px;">
+                ACESSAR
+            </button>
+        </div>
+    </div>
+
+    <!-- ========== PAINEL ADMINISTRATIVO ========== -->
+    <div id="adminPanel" style="display:none;">
+        
+        <!-- Navbar Admin -->
+        <nav class="navbar">
+            <a href="index.html" class="nav-logo">
+                <i class="fas fa-dog"></i> BIGBABYDOG <span style="font-size:0.7rem;color:var(--danger)">ADMIN</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Ver Site</a></li>
+                <li><a href="#" onclick="sairAdmin()">Sair</a></li>
+            </ul>
+        </nav>
+
+        <!-- Conteúdo do Painel -->
+        <main class="admin-panel">
+            <h1 style="font-family:var(--font-display);margin-bottom:20px;">PAINEL DE <span style="color:var(--neon);">CONTROLE</span></h1>
+            
+            <!-- Abas -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="produtos">📦 PRODUTOS</button>
+                <button class="admin-tab" data-tab="pedidos">🛒 PEDIDOS</button>
+            </div>
+            
+            <!-- Seção Produtos -->
+            <div class="admin-section active" id="section-produtos">
+                
+                <!-- Formulário Adicionar/Editar Produto -->
+                <div class="admin-form" id="formProduto">
+                    <h3 style="font-family:var(--font-display);margin-bottom:16px;">ADICIONAR / EDITAR PRODUTO</h3>
+                    <input type="hidden" id="prodId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome do Produto *</label>
+                            <input type="text" id="prodNome" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria *</label>
+                            <select id="prodCategoria" required>
+                                <option value="">Selecione...</option>
+                                <option value="camiseta">Camiseta</option>
+                                <option value="calca">Calça</option>
+                                <option value="moletom">Moletom</option>
+                                <option value="tenis">Tênis</option>
+                                <option value="acessorio">Acessório</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Preço (R$) *</label>
+                            <input type="number" id="prodPreco" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Preço Antigo (se promoção)</label>
+                            <input type="number" id="prodPrecoAntigo" step="0.01" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <textarea id="prodDescricao" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Imagem Principal (URL)</label>
+                            <input type="url" id="prodImg1" placeholder="https://placehold.co/600x800/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Imagem 2 (URL)</label>
+                            <input type="url" id="prodImg2" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label>Imagem 3 (URL)</label>
+                            <input type="url" id="prodImg3" placeholder="https://...">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tamanhos (separados por vírgula)</label>
+                            <input type="text" id="prodTamanhos" placeholder="P, M, G, GG" value="P, M, G, GG">
+                        </div>
+                        <div class="form-group" style="display:flex;align-items:flex-end;gap:20px;padding-bottom:16px;">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" id="prodDestaque"> Destaque
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" id="prodNovo"> Novo
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">💾 SALVAR PRODUTO</button>
+                </div>
+                
+                <!-- Tabela de Produtos -->
+                <h3 style="font-family:var(--font-display);margin:30px 0 16px;">TODOS OS PRODUTOS</h3>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Imagem</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Preço</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProdutosTbody">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Seção Pedidos -->
+            <div class="admin-section" id="section-pedidos">
+                <h3 style="font-family:var(--font-display);margin-bottom:20px;">PEDIDOS RECEBIDOS</h3>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Itens</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminPedidosTbody">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <p>© 2024 BIGBABYDOG - Painel Administrativo</p>
+    </footer>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script src="js/dados.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/carrinho.js"></script>
+    <script src="js/admin.js"></script>
+    
+    <script>
+        /**
+         * Função para sair do painel admin
+         */
+        function sairAdmin() {
+            sessionStorage.removeItem('bbd_admin_auth');
+            window.location.reload();
+        }
+    </script>
+
+</body>
+</html>

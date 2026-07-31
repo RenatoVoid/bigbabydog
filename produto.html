@@ -1,0 +1,307 @@
+<!-- ============================================================
+     PRODUTO.HTML - Página individual do produto
+     Galeria, seletor de tamanho, botão comprar e sugestões
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produto - BIGBABYDOG</title>
+    
+    <!-- Fontes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <i class="fas fa-dog"></i> BIGBABYDOG
+        </a>
+        
+        <button class="menu-toggle" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="loja.html">Loja</a></li>
+            <li><a href="index.html#sobre">Sobre</a></li>
+            <li>
+                <button class="nav-cart" onclick="window.carrinho.abrir()" aria-label="Carrinho">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount" style="display:none">0</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- ========== DETALHE DO PRODUTO ========== -->
+    <main class="produto-detalhe" id="produtoDetalhe">
+        <!-- Coluna Esquerda: Galeria -->
+        <div class="produto-galeria">
+            <img id="galeriaPrincipal" src="" alt="" class="galeria-principal">
+            <div class="galeria-thumbs" id="galeriaThumbs">
+                <!-- Miniaturas geradas via JS -->
+            </div>
+        </div>
+        
+        <!-- Coluna Direita: Informações -->
+        <div class="produto-info">
+            <div class="produto-cat" id="produtoCategoria"></div>
+            <h1 id="produtoNome"></h1>
+            
+            <!-- Preço -->
+            <div class="produto-preco">
+                <span id="produtoPreco"></span>
+                <s id="produtoPrecoAntigo" style="display:none;"></s>
+            </div>
+            
+            <!-- Seletor de Tamanho -->
+            <div class="tamanho-selector">
+                <h3>SELECIONE O TAMANHO <span style="color:var(--danger)">*</span></h3>
+                <div class="tamanho-opcoes" id="tamanhoOpcoes">
+                    <!-- Botões de tamanho gerados via JS -->
+                </div>
+            </div>
+            
+            <!-- Botão Comprar -->
+            <button class="btn-comprar" id="btnComprar" disabled>
+                <i class="fas fa-shopping-cart"></i> SELECIONE UM TAMANHO
+            </button>
+            
+            <!-- Descrição -->
+            <div class="produto-desc" id="produtoDescricao" style="margin-top:24px;"></div>
+            
+            <!-- Badges -->
+            <div id="produtoBadges" style="margin-top:16px;"></div>
+        </div>
+    </main>
+
+    <!-- ========== SEÇÃO "QUEM COMPROU TAMBÉM LEVOU" ========== -->
+    <section class="container" style="padding: 40px 20px 60px;">
+        <h3 class="section-title">QUEM COMPROU <span>TAMBÉM LEVOU</span></h3>
+        <div class="produtos-grid" id="sugestoesGrid">
+            <!-- Preenchido via JavaScript -->
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="social-icons">
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <p>© 2024 BIGBABYDOG - Todos os direitos reservados</p>
+    </footer>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script src="js/dados.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/carrinho.js"></script>
+    
+    <script>
+        /**
+         * PRODUTO.JS - Lógica da página de produto
+         * Carrega detalhes, galeria, seletor de tamanho e sugestões
+         */
+        
+        let produtoAtual = null;
+        let tamanhoSelecionado = null;
+        
+        /**
+         * Obtém o ID do produto da URL (?id=1)
+         */
+        function obterIdDaURL() {
+            const params = new URLSearchParams(window.location.search);
+            return parseInt(params.get('id')) || 1; // default: produto 1
+        }
+        
+        /**
+         * Carrega os dados do produto e renderiza a página
+         */
+        function carregarProduto() {
+            const id = obterIdDaURL();
+            const produtos = obterProdutos();
+            produtoAtual = produtos.find(p => p.id === id);
+            
+            // Se não encontrar, redireciona para a loja
+            if (!produtoAtual) {
+                window.location.href = 'loja.html';
+                return;
+            }
+            
+            // Atualiza título da página
+            document.title = `${produtoAtual.nome} - BIGBABYDOG`;
+            
+            // Preenche informações
+            document.getElementById('produtoNome').textContent = produtoAtual.nome;
+            document.getElementById('produtoCategoria').textContent = produtoAtual.categoria;
+            document.getElementById('produtoPreco').textContent = formatarMoeda(produtoAtual.preco);
+            document.getElementById('produtoDescricao').textContent = produtoAtual.descricao;
+            
+            // Preço antigo (se houver promoção)
+            if (produtoAtual.precoAntigo) {
+                document.getElementById('produtoPrecoAntigo').textContent = formatarMoeda(produtoAtual.precoAntigo);
+                document.getElementById('produtoPrecoAntigo').style.display = 'inline';
+            }
+            
+            // Badges
+            const badgesContainer = document.getElementById('produtoBadges');
+            let badges = '';
+            if (produtoAtual.novo) badges += '<span class="card-badge badge-novo" style="position:static;display:inline-block;margin-right:8px;">Novo</span>';
+            if (produtoAtual.precoAntigo) {
+                const desconto = Math.round(((produtoAtual.precoAntigo - produtoAtual.preco) / produtoAtual.precoAntigo) * 100);
+                badges += `<span class="card-badge badge-promo" style="position:static;display:inline-block;">-${desconto}%</span>`;
+            }
+            badgesContainer.innerHTML = badges;
+            
+            // Renderiza galeria
+            renderizarGaleria();
+            
+            // Renderiza seletor de tamanho
+            renderizarTamanhos();
+            
+            // Carrega sugestões
+            carregarSugestoes();
+        }
+        
+        /**
+         * Renderiza a galeria de imagens do produto
+         */
+        function renderizarGaleria() {
+            const principal = document.getElementById('galeriaPrincipal');
+            const thumbsContainer = document.getElementById('galeriaThumbs');
+            
+            principal.src = produtoAtual.imagens[0];
+            principal.alt = produtoAtual.nome;
+            
+            thumbsContainer.innerHTML = produtoAtual.imagens.map((img, index) => `
+                <img 
+                    src="${img}" 
+                    alt="${produtoAtual.nome} - Imagem ${index + 1}" 
+                    class="${index === 0 ? 'active' : ''}"
+                    onclick="trocarImagemPrincipal('${img}', this)"
+                    loading="lazy"
+                >
+            `).join('');
+        }
+        
+        /**
+         * Troca a imagem principal da galeria
+         */
+        function trocarImagemPrincipal(src, thumbElement) {
+            document.getElementById('galeriaPrincipal').src = src;
+            
+            // Atualiza a classe active nas miniaturas
+            document.querySelectorAll('.galeria-thumbs img').forEach(img => {
+                img.classList.remove('active');
+            });
+            thumbElement.classList.add('active');
+        }
+        
+        /**
+         * Renderiza os botões de seleção de tamanho
+         */
+        function renderizarTamanhos() {
+            const container = document.getElementById('tamanhoOpcoes');
+            
+            container.innerHTML = produtoAtual.tamanhos.map(tamanho => `
+                <button class="tamanho-btn" data-tamanho="${tamanho}" onclick="selecionarTamanho('${tamanho}', this)">
+                    ${tamanho}
+                </button>
+            `).join('');
+        }
+        
+        /**
+         * Seleciona um tamanho e habilita o botão de compra
+         */
+        function selecionarTamanho(tamanho, elemento) {
+            // Remove seleção anterior
+            document.querySelectorAll('.tamanho-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Seleciona o novo
+            elemento.classList.add('selected');
+            tamanhoSelecionado = tamanho;
+            
+            // Habilita o botão de compra
+            const btnComprar = document.getElementById('btnComprar');
+            btnComprar.disabled = false;
+            btnComprar.innerHTML = `<i class="fas fa-shopping-cart"></i> ADICIONAR AO CARRINHO - ${formatarMoeda(produtoAtual.preco)}`;
+        }
+        
+        /**
+         * Carrega produtos sugeridos (aleatórios da mesma categoria ou geral)
+         */
+        function carregarSugestoes() {
+            const grid = document.getElementById('sugestoesGrid');
+            if (!grid) return;
+            
+            const todos = obterProdutos();
+            
+            // Filtra: mesma categoria, mas produto diferente
+            let sugestoes = todos.filter(p => 
+                p.id !== produtoAtual.id && p.categoria === produtoAtual.categoria
+            );
+            
+            // Se não tiver 3 sugestões da mesma categoria, completa com outros
+            if (sugestoes.length < 3) {
+                const outros = todos.filter(p => 
+                    p.id !== produtoAtual.id && p.categoria !== produtoAtual.categoria
+                );
+                // Embaralha e pega o necessário
+                outros.sort(() => Math.random() - 0.5);
+                sugestoes = [...sugestoes, ...outros].slice(0, 4);
+            } else {
+                // Embaralha e pega 4
+                sugestoes.sort(() => Math.random() - 0.5);
+                sugestoes = sugestoes.slice(0, 4);
+            }
+            
+            grid.innerHTML = sugestoes.map(produto => `
+                <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${produto.id}'">
+                    ${produto.novo ? '<span class="card-badge badge-novo">Novo</span>' : ''}
+                    ${produto.precoAntigo ? '<span class="card-badge badge-promo">Promo</span>' : ''}
+                    <img src="${produto.imagens[0]}" alt="${produto.nome}" class="card-img" loading="lazy">
+                    <div class="card-body">
+                        <div class="card-categoria">${produto.categoria}</div>
+                        <div class="card-nome">${produto.nome}</div>
+                        <div class="card-preco">
+                            <span class="card-preco-atual">${formatarMoeda(produto.preco)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ========== INICIALIZAÇÃO ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarProduto();
+            
+            // Configura o botão de compra
+            const btnComprar = document.getElementById('btnComprar');
+            btnComprar.addEventListener('click', () => {
+                if (!tamanhoSelecionado) {
+                    alert('Por favor, selecione um tamanho antes de comprar!');
+                    return;
+                }
+                
+                adicionarAoCarrinho(produtoAtual.id, tamanhoSelecionado);
+            });
+        });
+    </script>
+
+</body>
+</html>
