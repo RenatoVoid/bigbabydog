@@ -1,6 +1,5 @@
 <!-- ============================================================
-     LOJA.HTML - Catálogo de produtos BIGBABYDOG
-     Seções: Destaques, Novidades, Categorias com "Ver mais"
+     LOJA.HTML - Catálogo com busca e filtros
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -8,112 +7,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loja - BIGBABYDOG</title>
-    
-    <!-- Fontes Google -->
+
+    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Estilos globais -->
     <link rel="stylesheet" href="css/style.css">
-    
-    <style>
-        .store-section {
-            margin-bottom: 50px;
-            scroll-margin-top: 80px;
-        }
-        .store-section-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-            position: relative;
-        }
-        .store-section-header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: var(--neon);
-            box-shadow: 0 0 10px var(--neon-glow);
-        }
-        .store-section-header i {
-            font-size: 1.6rem;
-            color: var(--neon);
-            filter: drop-shadow(0 0 6px var(--neon-glow));
-        }
-        .store-section-header h2 {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            letter-spacing: 2px;
-            color: #fff;
-            margin: 0;
-        }
-        .store-section-header h2 span {
-            color: var(--neon);
-        }
-        .btn-ver-mais {
-            display: none; /* controlado pelo JS */
-            width: fit-content;
-            margin: 20px auto 0;
-            padding: 10px 28px;
-            font-family: var(--font-display);
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn-ver-mais:hover {
-            border-color: var(--neon);
-            color: var(--neon);
-            box-shadow: 0 0 12px var(--neon-glow);
-        }
-        .empty-section {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
-            font-style: italic;
-        }
-        @media (max-width: 480px) {
-            .store-section-header h2 {
-                font-size: 1.1rem;
-            }
-        }
-    </style>
 </head>
 <body>
 
     <!-- ========== NAVBAR ========== -->
     <nav class="navbar">
         <a href="index.html" class="nav-logo">
-            <i class="fas fa-dog"></i> BIGBABYDOG
+            BIGBABYDOG
         </a>
-        
-        <button class="menu-toggle" aria-label="Menu">
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
             <i class="fas fa-bars"></i>
         </button>
-        
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
             <li><a href="index.html">Home</a></li>
             <li><a href="loja.html" class="active">Loja</a></li>
             <li><a href="index.html#sobre">Sobre</a></li>
             <li>
                 <button class="nav-cart" onclick="window.carrinho?.abrir()" aria-label="Carrinho">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount" style="display:none">0</span>
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
                 </button>
             </li>
         </ul>
@@ -122,96 +45,37 @@
     <!-- ========== CONTEÚDO PRINCIPAL ========== -->
     <main style="padding: 100px 20px 60px;">
         <div class="container">
-            
-            <h1 class="section-title" style="text-align:left; margin-bottom:10px;">
-                NOSSA <span>COLEÇÃO</span>
+
+            <h1 class="section-title" style="text-align:left; margin-bottom:8px;">
+                Nossa <span>coleção</span>
             </h1>
             <p style="color:var(--text-muted); margin-bottom:30px; font-size:0.95rem;">
-                Explore as categorias abaixo ou role para descobrir as novidades.
+                Encontre a peça perfeita para o seu estilo
             </p>
-            
-            <!-- ========== DESTAQUES ========== -->
-            <div id="destaques" class="store-section">
-                <div class="store-section-header">
-                    <i class="fas fa-fire"></i>
-                    <h2>EM <span>DESTAQUE</span></h2>
-                </div>
-                <div id="grid-destaques" class="produtos-grid">
-                    <p class="empty-section">Carregando...</p>
-                </div>
-            </div>
-            
-            <!-- ========== NOVIDADES ========== -->
-            <div id="novidades" class="store-section">
-                <div class="store-section-header">
-                    <i class="fas fa-sparkles"></i>
-                    <h2>RECÉM <span>CHEGADOS</span></h2>
-                </div>
-                <div id="grid-novidades" class="produtos-grid">
-                    <p class="empty-section">Carregando...</p>
+
+            <!-- Barra de busca e filtros -->
+            <div class="filtros-bar">
+                <input type="text" id="buscaInput" class="busca-input" placeholder="Buscar produtos...">
+
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <button class="filtro-btn active" data-categoria="todos">Todos</button>
+                    <button class="filtro-btn" data-categoria="camiseta">Camisetas</button>
+                    <button class="filtro-btn" data-categoria="calca">Calças</button>
+                    <button class="filtro-btn" data-categoria="moletom">Moletons</button>
+                    <button class="filtro-btn" data-categoria="tenis">Tênis</button>
+                    <button class="filtro-btn" data-categoria="acessorio">Acessórios</button>
                 </div>
             </div>
-            
-            <!-- ========== CAMISETAS ========== -->
-            <div id="camisetas" class="store-section">
-                <div class="store-section-header">
-                    <i class="fas fa-tshirt"></i>
-                    <h2><span>CAMISETAS</span></h2>
+
+            <!-- Grid de produtos -->
+            <div class="produtos-grid" id="catalogoGrid">
+                <!-- Carregando... -->
+                <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">
+                    <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                    <p style="margin-top:10px;">Carregando produtos...</p>
                 </div>
-                <div id="grid-camisetas" class="produtos-grid">
-                    <p class="empty-section">Carregando...</p>
-                </div>
-                <button class="btn-ver-mais" data-categoria="camiseta">VER MAIS <i class="fas fa-chevron-down"></i></button>
             </div>
-            
-            <!-- ========== CALÇAS ========== -->
-            <div id="calcas" class="store-section">
-                <div class="store-section-header">
-                    <i class="fas fa-person-walking"></i>
-                    <h2><span>CALÇAS</span></h2>
-                </div>
-                <div id="grid-calcas" class="produtos-grid">
-                    <p class="empty-section">Carregando...</p>
-                </div>
-                <button class="btn-ver-mais" data-categoria="calca">VER MAIS <i class="fas fa-chevron-down"></i></button>
-            </div>
-            
-            <!-- ========== MOLETONS ========== -->
-            <div id="moletons" class="store-section">
-                <div class="store-section-header">
-                    <i class="fas fa-vest"></i>
-                    <h2><span>MOLETONS</span></h2>
-                </div>
-                <div id="grid-moletons" class="produtos-grid">
-                    <p class="empty-section">Carregando...</p>
-                </div>
-                <button class="btn-ver-mais" data-categoria="moletom">VER MAIS <i class="fas fa-chevron-down"></i></button>
-            </div>
-            
-            <!-- ========== TÊNIS ========== -->
-            <div id="tenis" class="store-section">
-                <div class="store-section-header">
-                    <i class="fas fa-shoe-prints"></i>
-                    <h2><span>TÊNIS</span></h2>
-                </div>
-                <div id="grid-tenis" class="produtos-grid">
-                    <p class="empty-section">Carregando...</p>
-                </div>
-                <button class="btn-ver-mais" data-categoria="tenis">VER MAIS <i class="fas fa-chevron-down"></i></button>
-            </div>
-            
-            <!-- ========== ACESSÓRIOS ========== -->
-            <div id="acessorios" class="store-section">
-                <div class="store-section-header">
-                    <i class="fas fa-gem"></i>
-                    <h2><span>ACESSÓRIOS</span></h2>
-                </div>
-                <div id="grid-acessorios" class="produtos-grid">
-                    <p class="empty-section">Carregando...</p>
-                </div>
-                <button class="btn-ver-mais" data-categoria="acessorio">VER MAIS <i class="fas fa-chevron-down"></i></button>
-            </div>
-            
+
         </div>
     </main>
 
@@ -226,6 +90,21 @@
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/loja.js"></script>
+    <script type="module" src="js/carrinho.js"></script>
+
+    <!-- Mobile menu toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('menuToggle');
+            const links = document.getElementById('navLinks');
+            if (toggle && links) {
+                toggle.addEventListener('click', () => {
+                    links.classList.toggle('open');
+                });
+            }
+        });
+    </script>
+
 </body>
 </html>

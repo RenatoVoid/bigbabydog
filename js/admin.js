@@ -44,12 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Evento de submit no <form> real
     if (elementos.formProduto) {
         elementos.formProduto.addEventListener('submit', adicionarProduto);
     }
 
-    // Abas
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
@@ -72,7 +70,7 @@ async function verificarSessao() {
 }
 
 async function fazerLogin() {
-    const email = elementos.emailInput.value.trim() || 'admin@bigbabydog.com';
+    const email = elementos.emailInput.value.trim() || 'admin@gmail.com'; // alterado
     const senha = elementos.senhaInput.value;
 
     if (!senha) {
@@ -128,7 +126,7 @@ async function carregarProdutosAdmin() {
     tbody.innerHTML = produtos.map(p => `
         <tr>
             <td>${p.id}</td>
-            <td><img src="${p.imagem || 'https://placehold.co/40x50'}" style="width:40px;height:50px;object-fit:cover;border-radius:4px;"></td>
+            <td><img src="${p.imagem || 'https://placehold.co/40x50/e0ddd6/1a1a2e?text=?'}" style="width:40px;height:50px;object-fit:cover;border-radius:4px;"></td>
             <td>${p.nome}</td>
             <td>${p.categoria}</td>
             <td>R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</td>
@@ -152,7 +150,6 @@ async function adicionarProduto(event) {
     const arquivo = elementos.prodImagemUpload.files[0];
     const urlImagem = elementos.prodImagemUrl.value.trim();
 
-    // Tamanhos selecionados
     const tamanhos = Array.from(elementos.tamanhoCheckboxes)
         .filter(cb => cb.checked)
         .map(cb => cb.value);
@@ -170,21 +167,36 @@ async function adicionarProduto(event) {
 
     if (arquivo) {
         const nomeArquivo = `produto_${Date.now()}_${arquivo.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('produtos')
-            .upload(nomeArquivo, arquivo, { cacheControl: '3600' });
+        // CORREÇÃO: usar arrayBuffer e contentType
+        try {
+            const arrayBuffer = await arquivo.arrayBuffer();
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('produtos')
+                .upload(nomeArquivo, arrayBuffer, {
+                    cacheControl: '3600',
+                    contentType: arquivo.type
+                });
 
-        if (uploadError) {
-            alert('Erro ao enviar imagem: ' + uploadError.message);
+            if (uploadError) {
+                alert('Erro ao enviar imagem: ' + uploadError.message);
+                return;
+            }
+
+            const { data: urlData } = supabase.storage.from('produtos').getPublicUrl(nomeArquivo);
+            imagemUrl = urlData.publicUrl;
+        } catch (err) {
+            alert('Erro ao processar o arquivo: ' + err.message);
             return;
         }
-
-        const { data: urlData } = supabase.storage.from('produtos').getPublicUrl(nomeArquivo);
-        imagemUrl = urlData.publicUrl;
     } else if (urlImagem) {
         imagemUrl = urlImagem;
     } else {
-        imagemUrl = `https://placehold.co/600x800/1a1a2e/b366ff?text=${encodeURIComponent(nome)}`;
+        imagemUrl = `https://placehold.co/600x800/e0ddd6/1a1a2e?text=${encodeURIComponent(nome)}`;
+    }
+
+    // Verificação: se a URL gerada estiver vazia, usar placeholder
+    if (!imagemUrl) {
+        imagemUrl = `https://placehold.co/600x800/e0ddd6/1a1a2e?text=${encodeURIComponent(nome)}`;
     }
 
     const { error } = await supabase.from('produtos').insert([{
@@ -206,7 +218,6 @@ async function adicionarProduto(event) {
 
     alert('Produto cadastrado com sucesso!');
     elementos.formProduto.reset();
-    // Re-marcar tamanhos padrão após reset
     elementos.tamanhoCheckboxes.forEach(cb => cb.checked = true);
     carregarProdutosAdmin();
 }

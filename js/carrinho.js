@@ -1,28 +1,24 @@
 // ============================================================
-// CARRINHO.JS - Gestão do carrinho de compras (localStorage)
+// CARRINHO.JS - Gestão do carrinho (localStorage)
 // ============================================================
 
-/**
- * Classe Carrinho - gerencia itens, localStorage e UI do modal
- */
 class Carrinho {
     constructor() {
         this.itens = JSON.parse(localStorage.getItem('bbd_carrinho') || '[]');
-        this.inicializar();
+        this.atualizarUI();
+        console.log('🛒 Carrinho inicializado com', this.itens.length, 'itens');
     }
-    
-    /** Salva o carrinho no localStorage e atualiza UI */
+
     salvar() {
         localStorage.setItem('bbd_carrinho', JSON.stringify(this.itens));
         this.atualizarUI();
+        console.log('💾 Carrinho salvo:', this.itens);
     }
-    
-    /** Adiciona um produto ao carrinho */
+
     adicionar(produto, tamanho, quantidade = 1) {
         const existente = this.itens.find(
             item => item.id === produto.id && item.tamanho === tamanho
         );
-        
         if (existente) {
             existente.quantidade += quantidade;
         } else {
@@ -30,24 +26,21 @@ class Carrinho {
                 id: produto.id,
                 nome: produto.nome,
                 preco: produto.preco,
-                imagem: Array.isArray(produto.imagens) ? produto.imagens[0] : produto.imagem,
+                imagem: produto.imagem,
                 tamanho: tamanho,
                 quantidade: quantidade
             });
         }
-        
         this.salvar();
         this.abrir();
         mostrarToast(`${produto.nome} adicionado ao carrinho!`);
     }
-    
-    /** Remove um item pelo índice */
+
     remover(indice) {
         this.itens.splice(indice, 1);
         this.salvar();
     }
-    
-    /** Altera a quantidade de um item */
+
     alterarQuantidade(indice, novaQtd) {
         if (novaQtd < 1) {
             this.remover(indice);
@@ -56,24 +49,20 @@ class Carrinho {
         this.itens[indice].quantidade = novaQtd;
         this.salvar();
     }
-    
-    /** Calcula o subtotal */
+
     calcularSubtotal() {
         return this.itens.reduce((total, item) => total + (item.preco * item.quantidade), 0);
     }
-    
-    /** Calcula o total de itens (soma das quantidades) */
+
     calcularTotalItens() {
         return this.itens.reduce((total, item) => total + item.quantidade, 0);
     }
-    
-    /** Limpa o carrinho completamente */
+
     limpar() {
         this.itens = [];
         this.salvar();
     }
-    
-    /** Abre o modal do carrinho */
+
     abrir() {
         const overlay = document.getElementById('cartOverlay');
         const sidebar = document.getElementById('cartSidebar');
@@ -84,8 +73,7 @@ class Carrinho {
         }
         this.renderizarItens();
     }
-    
-    /** Fecha o modal do carrinho */
+
     fechar() {
         const overlay = document.getElementById('cartOverlay');
         const sidebar = document.getElementById('cartSidebar');
@@ -95,12 +83,11 @@ class Carrinho {
             document.body.style.overflow = '';
         }
     }
-    
-    /** Renderiza os itens na sidebar */
+
     renderizarItens() {
         const container = document.getElementById('cartItemsContainer');
         if (!container) return;
-        
+
         if (this.itens.length === 0) {
             container.innerHTML = `
                 <div class="cart-empty">
@@ -128,35 +115,49 @@ class Carrinho {
                 </div>
             `).join('');
         }
-        
+
         this.atualizarResumo();
     }
-    
-    /** Atualiza o resumo financeiro */
+
     atualizarResumo() {
         const subtotalEl = document.getElementById('cartSubtotal');
         const totalEl = document.getElementById('cartTotal');
         const freteEl = document.getElementById('cartFrete');
-        
+
         if (!subtotalEl || !totalEl) return;
-        
+
         const subtotal = this.calcularSubtotal();
         subtotalEl.textContent = formatarMoeda(subtotal);
         if (freteEl) freteEl.textContent = subtotal >= 250 ? 'GRÁTIS' : 'A combinar';
         totalEl.textContent = formatarMoeda(subtotal);
     }
-    
-    /** Atualiza o contador e o botão de finalizar */
+
     atualizarUI() {
         this.renderizarItens();
         atualizarContadorCarrinho();
     }
 }
 
-/** Injeta o HTML do modal do carrinho no body */
+// ---------- FUNÇÕES AUXILIARES ----------
+function formatarMoeda(valor) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(valor);
+}
+window.formatarMoeda = formatarMoeda;
+
+function mostrarToast(mensagem) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.textContent = mensagem;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
 function injetarModalCarrinho() {
     if (document.getElementById('cartOverlay')) return;
-    
+
     const modalHTML = `
         <div id="cartOverlay" class="cart-overlay"></div>
         <div id="cartSidebar" class="cart-sidebar">
@@ -181,15 +182,14 @@ function injetarModalCarrinho() {
                 </button>
             </div>
         </div>`;
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
+
     document.getElementById('cartOverlay').addEventListener('click', () => {
         window.carrinho.fechar();
     });
 }
 
-/** Redireciona para a página de checkout */
 function irParaCheckout() {
     if (window.carrinho.itens.length === 0) {
         alert('Seu carrinho está vazio!');
@@ -198,12 +198,12 @@ function irParaCheckout() {
     window.carrinho.fechar();
     window.location.href = 'checkout.html';
 }
+window.irParaCheckout = irParaCheckout;
 
-/** Atualiza o contador de itens no ícone do carrinho */
 function atualizarContadorCarrinho() {
     const contador = document.getElementById('cartCount');
     if (!contador) return;
-    
+
     const total = window.carrinho ? window.carrinho.calcularTotalItens() : 0;
     contador.textContent = total;
     contador.style.display = total > 0 ? 'flex' : 'none';
@@ -211,28 +211,38 @@ function atualizarContadorCarrinho() {
     setTimeout(() => contador.classList.remove('pulse'), 400);
 }
 
-/** Função global para adicionar ao carrinho a partir de qualquer página */
+// ---------- FUNÇÃO ADICIONAR AO CARRINHO (GLOBAL) ----------
 async function adicionarAoCarrinho(produtoId, tamanho) {
     if (!tamanho) {
         alert('Por favor, selecione um tamanho!');
         return;
     }
-    
-    const produto = await obterProdutoPorId(produtoId);
-    if (!produto) {
+
+    if (!window.carrinho) {
+        console.error('Carrinho não inicializado');
+        alert('Erro ao adicionar ao carrinho. Tente novamente.');
+        return;
+    }
+
+    const { data: produto, error } = await window.supabase
+        .from('produtos')
+        .select('*')
+        .eq('id', produtoId)
+        .single();
+
+    if (error || !produto) {
         alert('Produto não encontrado!');
         return;
     }
-    
+
     window.carrinho.adicionar(produto, tamanho);
 }
-
-// Inicialização ao carregar a página
-document.addEventListener('DOMContentLoaded', () => {
-    injetarModalCarrinho();
-    window.carrinho = new Carrinho();
-    atualizarContadorCarrinho();
-});
-
-window.irParaCheckout = irParaCheckout;
+// 🔥 EXPÕE A FUNÇÃO GLOBALMENTE
 window.adicionarAoCarrinho = adicionarAoCarrinho;
+
+// ---------- INICIALIZAÇÃO IMEDIATA ----------
+injetarModalCarrinho();
+window.carrinho = new Carrinho();
+atualizarContadorCarrinho();
+
+console.log('✅ Carrinho e função adicionarAoCarrinho prontos!');

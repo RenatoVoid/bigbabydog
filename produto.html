@@ -1,6 +1,5 @@
 <!-- ============================================================
      PRODUTO.HTML - Página individual do produto
-     Carrega dados do Supabase, galeria, seletor de tamanho
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -8,99 +7,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Produto - BIGBABYDOG</title>
-    
-    <!-- Fontes Google -->
+
+    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Estilos -->
+
+    <!-- Estilos globais -->
     <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .produto-loading { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .produto-loading i { font-size: 2.5rem; margin-bottom: 16px; display: block; }
+        .produto-erro { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .produto-erro i { font-size: 3rem; color: var(--accent); margin-bottom: 16px; display: block; }
+        .produto-erro .btn { margin-top: 20px; }
+        @media (max-width: 768px) {
+            .produto-detalhe { padding-top: 80px; }
+        }
+    </style>
 </head>
 <body>
 
     <!-- ========== NAVBAR ========== -->
     <nav class="navbar">
-        <a href="index.html" class="nav-logo">
-            <i class="fas fa-dog"></i> BIGBABYDOG
-        </a>
-        
-        <button class="menu-toggle" aria-label="Menu">
+        <a href="index.html" class="nav-logo">BIGBABYDOG</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
             <i class="fas fa-bars"></i>
         </button>
-        
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
             <li><a href="index.html">Home</a></li>
             <li><a href="loja.html">Loja</a></li>
             <li><a href="index.html#sobre">Sobre</a></li>
             <li>
-                <button class="nav-cart" onclick="window.carrinho.abrir()" aria-label="Carrinho">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount" style="display:none">0</span>
+                <button class="nav-cart" onclick="window.carrinho?.abrir()" aria-label="Carrinho">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
                 </button>
             </li>
         </ul>
     </nav>
 
-    <!-- ========== DETALHE DO PRODUTO ========== -->
-    <main class="produto-detalhe" id="produtoDetalhe">
-        <!-- Coluna Esquerda: Galeria -->
-        <div class="produto-galeria">
-            <img id="galeriaPrincipal" src="" alt="" class="galeria-principal">
-            <div class="galeria-thumbs" id="galeriaThumbs">
-                <!-- Miniaturas geradas via JS -->
+    <!-- ========== CONTEÚDO PRINCIPAL ========== -->
+    <main>
+        <div id="produtoContainer">
+            <!-- Loading -->
+            <div id="loadingProduto" class="produto-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Carregando produto...</p>
             </div>
-        </div>
-        
-        <!-- Coluna Direita: Informações -->
-        <div class="produto-info">
-            <div class="produto-cat" id="produtoCategoria"></div>
-            <h1 id="produtoNome"></h1>
-            
-            <!-- Preço -->
-            <div class="produto-preco">
-                <span id="produtoPreco"></span>
-                <s id="produtoPrecoAntigo" style="display:none;"></s>
+
+            <!-- Erro -->
+            <div id="erroProduto" class="produto-erro" style="display:none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Produto não encontrado.</p>
+                <a href="loja.html" class="btn btn-outline">Voltar à loja</a>
             </div>
-            
-            <!-- Seletor de Tamanho -->
-            <div class="tamanho-selector">
-                <h3>SELECIONE O TAMANHO <span style="color:var(--danger)">*</span></h3>
-                <div class="tamanho-opcoes" id="tamanhoOpcoes">
-                    <!-- Botões de tamanho gerados via JS -->
+
+            <!-- Detalhe do produto -->
+            <div id="detalheProduto" class="produto-detalhe" style="display:none;">
+                <!-- Galeria -->
+                <div class="produto-galeria">
+                    <img id="galeriaPrincipal" src="" alt="" class="galeria-principal">
+                    <div class="galeria-thumbs" id="galeriaThumbs"></div>
+                </div>
+
+                <!-- Informações -->
+                <div class="produto-info">
+                    <div class="produto-cat" id="produtoCategoria"></div>
+                    <h1 id="produtoNome"></h1>
+                    <div class="produto-preco">
+                        <span id="produtoPreco"></span>
+                        <s id="produtoPrecoAntigo" style="display:none;"></s>
+                    </div>
+                    <div id="produtoBadges" style="margin-bottom:16px;"></div>
+                    <div class="produto-desc" id="produtoDescricao"></div>
+
+                    <!-- Tamanhos -->
+                    <div class="tamanho-selector">
+                        <h3>SELECIONE O TAMANHO <span style="color:var(--accent);">*</span></h3>
+                        <div class="tamanho-opcoes" id="tamanhoOpcoes"></div>
+                    </div>
+
+                    <!-- Comprar -->
+                    <button class="btn-comprar" id="btnComprar" disabled>
+                        <i class="fas fa-shopping-cart"></i> SELECIONE UM TAMANHO
+                    </button>
                 </div>
             </div>
-            
-            <!-- Botão Comprar -->
-            <button class="btn-comprar" id="btnComprar" disabled>
-                <i class="fas fa-shopping-cart"></i> SELECIONE UM TAMANHO
-            </button>
-            
-            <!-- Descrição -->
-            <div class="produto-desc" id="produtoDescricao" style="margin-top:24px;"></div>
-            
-            <!-- Badges -->
-            <div id="produtoBadges" style="margin-top:16px;"></div>
         </div>
-    </main>
 
-    <!-- ========== SEÇÃO "QUEM COMPROU TAMBÉM LEVOU" ========== -->
-    <section class="container" style="padding: 40px 20px 60px;">
-        <h3 class="section-title">QUEM COMPROU <span>TAMBÉM LEVOU</span></h3>
-        <div class="produtos-grid" id="sugestoesGrid">
-            <!-- Preenchido via JavaScript -->
-        </div>
-    </section>
+        <!-- Sugestões -->
+        <section class="container" style="padding: 40px 20px 60px;">
+            <h3 class="section-title">Quem comprou <span>também levou</span></h3>
+            <div class="produtos-grid" id="sugestoesGrid"></div>
+        </section>
+    </main>
 
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
         <div class="social-icons">
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-tiktok"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
         </div>
         <p>© 2024 BIGBABYDOG - Todos os direitos reservados</p>
     </footer>
@@ -108,196 +120,12 @@
     <!-- ========== SCRIPTS ========== -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        
         const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
         window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        await import('./js/main.js');
+        console.log('✅ Supabase inicializado');
         await import('./js/carrinho.js');
-        
-        // ---------- ESTADO ----------
-        let produtoAtual = null;
-        let tamanhoSelecionado = null;
-        
-        /**
-         * Obtém o ID do produto da URL
-         */
-        function obterIdDaURL() {
-            const params = new URLSearchParams(window.location.search);
-            return parseInt(params.get('id')) || null;
-        }
-        
-        /**
-         * Carrega os dados do produto do Supabase
-         */
-        async function carregarProduto() {
-            const id = obterIdDaURL();
-            if (!id) {
-                window.location.href = 'loja.html';
-                return;
-            }
-            
-            const { data: produto, error } = await window.supabase
-                .from('produtos')
-                .select('*')
-                .eq('id', id)
-                .single();
-            
-            if (error || !produto) {
-                window.location.href = 'loja.html';
-                return;
-            }
-            
-            produtoAtual = produto;
-            document.title = `${produto.nome} - BIGBABYDOG`;
-            
-            // Preenche informações
-            document.getElementById('produtoNome').textContent = produto.nome;
-            document.getElementById('produtoCategoria').textContent = produto.categoria;
-            document.getElementById('produtoPreco').textContent = formatarMoeda(produto.preco);
-            document.getElementById('produtoDescricao').textContent = produto.descricao || 'Sem descrição disponível.';
-            
-            // Preço antigo (promoção)
-            if (produto.preco_antigo) {
-                document.getElementById('produtoPrecoAntigo').textContent = formatarMoeda(produto.preco_antigo);
-                document.getElementById('produtoPrecoAntigo').style.display = 'inline';
-            }
-            
-            // Badges
-            const badgesContainer = document.getElementById('produtoBadges');
-            let badges = '';
-            if (produto.novo) badges += '<span class="card-badge badge-novo" style="position:static;display:inline-block;margin-right:8px;">Novo</span>';
-            if (produto.preco_antigo) {
-                const desconto = Math.round(((produto.preco_antigo - produto.preco) / produto.preco_antigo) * 100);
-                badges += `<span class="card-badge badge-promo" style="position:static;display:inline-block;">-${desconto}%</span>`;
-            }
-            badgesContainer.innerHTML = badges;
-            
-            // Renderiza galeria
-            renderizarGaleria(produto);
-            
-            // Renderiza seletor de tamanho
-            renderizarTamanhos(produto.tamanhos || ['P', 'M', 'G', 'GG']);
-            
-            // Carrega sugestões
-            carregarSugestoes(produto);
-        }
-        
-        /**
-         * Renderiza a galeria de imagens
-         */
-        function renderizarGaleria(produto) {
-            const principal = document.getElementById('galeriaPrincipal');
-            const thumbsContainer = document.getElementById('galeriaThumbs');
-            
-            // Cria array de imagens (principal + extras)
-            const imagens = [produto.imagem || 'https://placehold.co/600x800/1a1a2e/b366ff?text=' + encodeURIComponent(produto.nome)];
-            if (produto.imagens && Array.isArray(produto.imagens)) {
-                imagens.push(...produto.imagens);
-            }
-            
-            principal.src = imagens[0];
-            principal.alt = produto.nome;
-            
-            thumbsContainer.innerHTML = imagens.map((img, index) => `
-                <img 
-                    src="${img}" 
-                    alt="${produto.nome} - Imagem ${index + 1}" 
-                    class="${index === 0 ? 'active' : ''}"
-                    onclick="trocarImagemPrincipal('${img}', this)"
-                    loading="lazy"
-                >
-            `).join('');
-        }
-        
-        /**
-         * Troca a imagem principal da galeria
-         */
-        function trocarImagemPrincipal(src, thumbElement) {
-            document.getElementById('galeriaPrincipal').src = src;
-            document.querySelectorAll('.galeria-thumbs img').forEach(img => {
-                img.classList.remove('active');
-            });
-            thumbElement.classList.add('active');
-        }
-        
-        /**
-         * Renderiza os botões de seleção de tamanho
-         */
-        function renderizarTamanhos(tamanhos) {
-            const container = document.getElementById('tamanhoOpcoes');
-            container.innerHTML = tamanhos.map(tamanho => `
-                <button class="tamanho-btn" data-tamanho="${tamanho}" onclick="selecionarTamanho('${tamanho}', this)">
-                    ${tamanho}
-                </button>
-            `).join('');
-        }
-        
-        /**
-         * Seleciona um tamanho e habilita o botão de compra
-         */
-        function selecionarTamanho(tamanho, elemento) {
-            document.querySelectorAll('.tamanho-btn').forEach(btn => btn.classList.remove('selected'));
-            elemento.classList.add('selected');
-            tamanhoSelecionado = tamanho;
-            
-            const btnComprar = document.getElementById('btnComprar');
-            btnComprar.disabled = false;
-            btnComprar.innerHTML = `<i class="fas fa-shopping-cart"></i> ADICIONAR AO CARRINHO - ${formatarMoeda(produtoAtual.preco)}`;
-        }
-        
-        /**
-         * Carrega produtos sugeridos (mesma categoria)
-         */
-        async function carregarSugestoes(produtoAtual) {
-            const grid = document.getElementById('sugestoesGrid');
-            if (!grid) return;
-            
-            const { data: sugestoes, error } = await window.supabase
-                .from('produtos')
-                .select('*')
-                .eq('categoria', produtoAtual.categoria)
-                .neq('id', produtoAtual.id)
-                .limit(4);
-            
-            if (error || !sugestoes || sugestoes.length === 0) {
-                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Nenhuma sugestão disponível</p>';
-                return;
-            }
-            
-            grid.innerHTML = sugestoes.map(produto => `
-                <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${produto.id}'">
-                    <img src="${produto.imagem || 'https://placehold.co/600x800/1a1a2e/b366ff?text=' + encodeURIComponent(produto.nome)}" alt="${produto.nome}" class="card-img" loading="lazy">
-                    <div class="card-body">
-                        <div class="card-categoria">${produto.categoria}</div>
-                        <div class="card-nome">${produto.nome}</div>
-                        <div class="card-preco">
-                            <span class="card-preco-atual">${formatarMoeda(produto.preco)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // Funções globais necessárias
-        window.trocarImagemPrincipal = trocarImagemPrincipal;
-        window.selecionarTamanho = selecionarTamanho;
-        
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarProduto();
-            
-            // Configura o botão de compra
-            const btnComprar = document.getElementById('btnComprar');
-            btnComprar.addEventListener('click', () => {
-                if (!tamanhoSelecionado) {
-                    alert('Por favor, selecione um tamanho antes de comprar!');
-                    return;
-                }
-                adicionarAoCarrinho(produtoAtual.id, tamanhoSelecionado);
-            });
-        });
+        await import('./js/produto.js');
     </script>
 
 </body>

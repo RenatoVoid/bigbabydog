@@ -1,27 +1,14 @@
-<!-- ============================================================
-     INDEX.HTML - Página Principal da BIGBABYDOG
-     Hero section, destaques do Supabase, sobre e footer
-     ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIGBABYDOG - Moda Urbana Cyberpunk</title>
-    
-    <!-- Fontes Google -->
+    <title>BIGBABYDOG - Moda Urbana</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Estilos -->
     <link rel="stylesheet" href="css/style.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐕</text></svg>">
 </head>
 <body>
 
@@ -30,57 +17,46 @@
         <a href="index.html" class="nav-logo">
             <i class="fas fa-dog"></i> BIGBABYDOG
         </a>
-        
-        <button class="menu-toggle" aria-label="Menu">
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
             <i class="fas fa-bars"></i>
         </button>
-        
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
             <li><a href="index.html" class="active">Home</a></li>
             <li><a href="loja.html">Loja</a></li>
             <li><a href="index.html#sobre">Sobre</a></li>
             <li>
-                <button class="nav-cart" onclick="window.carrinho.abrir()" aria-label="Carrinho">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount" style="display:none">0</span>
+                <button class="nav-cart" onclick="window.carrinho?.abrir()" aria-label="Carrinho">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
                 </button>
             </li>
         </ul>
     </nav>
 
-    <!-- ========== HERO SECTION ========== -->
-    <header class="hero">
-        <div class="hero-grid"></div>
-        <div class="hero-content">
-            <h1>BIGBABYDOG</h1>
-            <p>ESTILO URBANO E ATITUDE</p>
-            <a href="loja.html" class="hero-btn">
-                <i class="fas fa-bolt"></i> VER COLEÇÃO
-            </a>
+    <!-- ========== CONTEÚDO PRINCIPAL ========== -->
+    <main>
+        <div class="container" style="padding-top: 40px;">
+            <h2 class="section-title">Destaques da <span>coleção</span></h2>
+            <p class="section-sub">As peças mais desejadas do momento</p>
+            <div class="produtos-grid" id="destaquesGrid">
+                <!-- Preenchido via JavaScript -->
+            </div>
+            <div class="text-center mt-3">
+                <a href="loja.html" class="btn btn-outline">Ver todos os produtos <i class="fas fa-arrow-right"></i></a>
+            </div>
         </div>
-    </header>
 
-    <!-- ========== DROPS EM DESTAQUE ========== -->
-    <section class="container" style="padding: 60px 20px;">
-        <h2 class="section-title"><span>🔥</span> DROP ATUAL <span>🔥</span></h2>
-        <div class="produtos-grid" id="destaquesGrid">
-            <!-- Preenchido via JavaScript com produtos em destaque do Supabase -->
-        </div>
-        <div style="text-align:center; margin-top: 40px;">
-            <a href="loja.html" class="btn btn-outline">VER TODOS OS PRODUTOS <i class="fas fa-arrow-right"></i></a>
-        </div>
-    </section>
-
-    <!-- ========== SEÇÃO SOBRE ========== -->
-    <section id="sobre" class="sobre">
-        <h2 class="section-title">SOBRE A <span>MARCA</span></h2>
-        <p>
-            A BIGBABYDOG nasceu nas ruas, alimentada pela energia pulsante da cultura urbana e 
-            pela estética cyberpunk. Cada peça é desenhada para quem vive o agora, sem medo de 
-            expressar sua individualidade. Do asfalto ao digital, vestimos a atitude de uma 
-            nova geração. <strong>Não seguimos tendências, criamos as nossas.</strong>
-        </p>
-    </section>
+        <!-- ========== SOBRE ========== -->
+        <section id="sobre" style="padding: 60px 20px; max-width: 700px; margin: 0 auto; text-align: center;">
+            <h2 class="section-title">Sobre a <span>marca</span></h2>
+            <p style="color: var(--text-secondary); line-height: 1.8; font-size: 1.05rem;">
+                A BIGBABYDOG nasceu nas ruas, alimentada pela energia da cultura urbana.
+                Cada peça é desenhada para quem vive o agora, sem medo de expressar sua individualidade.
+                Do asfalto ao digital, vestimos a atitude de uma nova geração.
+                <strong>Não seguimos tendências, criamos as nossas.</strong>
+            </p>
+        </section>
+    </main>
 
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
@@ -88,76 +64,88 @@
             <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
             <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
         </div>
         <p>© 2024 BIGBABYDOG - Todos os direitos reservados</p>
-        <p style="margin-top:4px;font-size:0.75rem">contato@bigbabydog.com | WhatsApp: (11) 99999-9999</p>
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
     <script type="module">
-        // Importa funções do main.js e carrinho.js
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        
-        // Configuração Supabase
+
         const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
         window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // Importa funções compartilhadas
-        const mainModule = await import('./js/main.js');
-        const carrinhoModule = await import('./js/carrinho.js');
-        
-        /**
-         * Carrega os produtos em destaque da home
-         * Busca no Supabase produtos onde destaque = true
-         */
+
+        // Importa carrinho e main (para funções auxiliares)
+        await import('./js/carrinho.js');
+        await import('./js/main.js');
+
+        // Carrega destaques
         async function carregarDestaques() {
             const grid = document.getElementById('destaquesGrid');
             if (!grid) return;
-            
+
             const { data: produtos, error } = await window.supabase
                 .from('produtos')
                 .select('*')
                 .eq('destaque', true)
-                .order('id', { ascending: true });
-            
-            if (error) {
-                console.error('Erro ao carregar destaques:', error);
-                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Erro ao carregar produtos</p>';
+                .order('id')
+                .limit(4);
+
+            if (error || !produtos || produtos.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Nenhum produto em destaque no momento</p>';
                 return;
             }
-            
-            if (!produtos || produtos.length === 0) {
-                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Nenhum produto em destaque no momento</p>';
-                return;
-            }
-            
-            grid.innerHTML = produtos.map(produto => `
-                <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${produto.id}'">
-                    ${produto.novo ? '<span class="card-badge badge-novo">Novo</span>' : ''}
-                    ${produto.preco_antigo ? '<span class="card-badge badge-promo">Promo</span>' : ''}
-                    <img src="${produto.imagem || 'https://placehold.co/600x800/1a1a2e/b366ff?text=' + encodeURIComponent(produto.nome)}" alt="${produto.nome}" class="card-img" loading="lazy">
+
+            grid.innerHTML = produtos.map(p => `
+                <div class="produto-card fade-in" onclick="window.location.href='produto.html?id=${p.id}'">
+                    ${p.novo ? '<span class="card-badge badge-novo">Novo</span>' : ''}
+                    ${p.preco_antigo ? '<span class="card-badge badge-promo">Promo</span>' : ''}
+                    <img src="${p.imagem || 'https://placehold.co/600x800/e0ddd6/1a1a2e?text=' + encodeURIComponent(p.nome)}" alt="${p.nome}" class="card-img" loading="lazy">
                     <div class="card-body">
-                        <div class="card-categoria">${produto.categoria}</div>
-                        <div class="card-nome">${produto.nome}</div>
+                        <div class="card-categoria">${p.categoria}</div>
+                        <div class="card-nome">${p.nome}</div>
                         <div class="card-preco">
-                            <span class="card-preco-atual">${formatarMoeda(produto.preco)}</span>
-                            ${produto.preco_antigo ? `<span class="card-preco-antigo">${formatarMoeda(produto.preco_antigo)}</span>` : ''}
+                            <span class="card-preco-atual">R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</span>
+                            ${p.preco_antigo ? `<span class="card-preco-antigo">R$ ${Number(p.preco_antigo).toFixed(2).replace('.', ',')}</span>` : ''}
                         </div>
-                        <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='produto.html?id=${produto.id}'">
-                            <i class="fas fa-shopping-bag"></i> COMPRAR
-                        </button>
+                        <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='produto.html?id=${p.id}'">Ver detalhes</button>
                     </div>
                 </div>
             `).join('');
         }
-        
-        // Inicializa quando o DOM estiver pronto
+
         document.addEventListener('DOMContentLoaded', () => {
             carregarDestaques();
+
+            // Mobile menu toggle
+            const toggle = document.getElementById('menuToggle');
+            const links = document.getElementById('navLinks');
+            if (toggle && links) {
+                toggle.addEventListener('click', () => {
+                    links.classList.toggle('open');
+                });
+            }
+        });
+
+        // Atualiza contador do carrinho
+        window.atualizarContadorCarrinho = function() {
+            const count = document.getElementById('cartCount');
+            if (!count) return;
+            const carrinho = JSON.parse(localStorage.getItem('bbd_carrinho') || '[]');
+            const total = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
+            count.textContent = total;
+            count.style.display = total > 0 ? 'flex' : 'none';
+        };
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.carrinho) {
+                window.carrinho.atualizarUI = function() {
+                    this.renderizarItens();
+                    window.atualizarContadorCarrinho();
+                };
+                window.atualizarContadorCarrinho();
+            }
         });
     </script>
-
 </body>
 </html>
