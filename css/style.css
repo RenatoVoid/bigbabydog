@@ -821,16 +821,18 @@ img {
 }
 .btn-finalizar {
     width: 100%;
-    padding: 12px;
+    padding: 14px 12px;
     background: var(--text-primary);
     color: #fff;
     border: none;
     border-radius: 8px;
     font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
     transition: background var(--transition);
     margin-top: 8px;
 }
+
 .btn-finalizar:hover {
     background: var(--accent);
 }
@@ -1114,6 +1116,26 @@ img {
     .checkout-resumo {
         margin-bottom: 20px;
     }
+    /* Ajuste do botão finalizar no carrinho para mobile */
+.cart-sidebar {
+    max-width: 100%;
+    right: -100%;
+}
+.cart-sidebar.open {
+    right: 0;
+}
+.cart-footer {
+    padding: 16px 16px 20px;
+}
+.btn-finalizar {
+    font-size: 0.9rem;
+    padding: 14px 10px;
+    margin-top: 4px;
+}
+.btn-continuar {
+    font-size: 0.8rem;
+    padding: 12px 10px;
+}
 }
 
 @media (max-width: 480px) {
