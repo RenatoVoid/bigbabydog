@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre - BIGBABYDOG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sobre-page {
+            padding: 120px 20px 60px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .sobre-hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .sobre-hero h1 {
+            font-weight: 900;
+            font-size: 3rem;
+            letter-spacing: -1px;
+            color: var(--text-primary);
+        }
+        .sobre-hero h1 span {
+            color: var(--accent);
+        }
+        .sobre-hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 8px auto 0;
+        }
+        .sobre-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        .sobre-grid-item {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .sobre-grid-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+        .sobre-grid-item i {
+            font-size: 2.2rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: block;
+        }
+        .sobre-grid-item h3 {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        .sobre-grid-item p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .sobre-imagem {
+            width: 100%;
+            border-radius: var(--radius);
+            margin: 30px 0;
+            background: var(--bg-card);
+            padding: 40px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .sobre-imagem i {
+            font-size: 4rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 10px;
+        }
+        .sobre-imagem p {
+            color: var(--text-muted);
+        }
+        .sobre-valores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .sobre-valor {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 8px 24px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .sobre-valor:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        @media (max-width: 768px) {
+            .sobre-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .sobre-hero h1 {
+                font-size: 2.2rem;
+            }
+            .sobre-page {
+                padding-top: 100px;
+            }
+        }
+        @media (max-width: 480px) {
+            .sobre-hero h1 {
+                font-size: 1.8rem;
+            }
+            .sobre-grid-item {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar (igual ao index) -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">BIGBABYDOG</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="loja.html">Loja</a></li>
+            <li><a href="sobre.html" class="active">Sobre</a></li>
+            <li>
+                <button class="nav-cart" onclick="window.carrinho?.abrir()" aria-label="Carrinho">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="sobre-page">
+        <div class="sobre-hero">
+            <h1>Sobre a <span>BIGBABYDOG</span></h1>
+            <p>Streetwear com atitude, nascido nas ruas e inspirado no basquete.</p>
+        </div>
+
+        <div class="sobre-imagem">
+            <i class="fas fa-tshirt"></i>
+            <p>Imagem da nossa primeira coleção (em breve)</p>
+        </div>
+
+        <div class="sobre-grid">
+            <div class="sobre-grid-item">
+                <i class="fas fa-rocket"></i>
+                <h3>Nossa História</h3>
+                <p>A BIGBABYDOG nasceu em 2024, em Campos do Jordão, com a ideia de unir a cultura do basquete de rua com a moda urbana. Começamos com pequenas tiragens e hoje já somos referência para quem busca estilo e autenticidade.</p>
+            </div>
+            <div class="sobre-grid-item">
+                <i class="fas fa-bullseye"></i>
+                <h3>Missão</h3>
+                <p>Vestir a atitude de quem vive a cidade, sem medo de expressar sua individualidade. Cada peça é pensada para durar e contar uma história.</p>
+            </div>
+            <div class="sobre-grid-item">
+                <i class="fas fa-eye"></i>
+                <h3>Visão</h3>
+                <p>Ser a marca de streetwear mais autêntica do Brasil, conectando pessoas através da moda, do esporte e da cultura urbana.</p>
+            </div>
+            <div class="sobre-grid-item">
+                <i class="fas fa-heart"></i>
+                <h3>Valores</h3>
+                <p>Autenticidade, qualidade, respeito à diversidade e paixão pelo que fazemos. Não seguimos tendências, criamos as nossas.</p>
+            </div>
+        </div>
+
+        <div class="sobre-valores">
+            <span class="sobre-valor">#Autenticidade</span>
+            <span class="sobre-valor">#Qualidade</span>
+            <span class="sobre-valor">#Diversidade</span>
+            <span class="sobre-valor">#Paixão</span>
+            <span class="sobre-valor">#Streetwear</span>
+            <span class="sobre-valor">#Basquete</span>
+        </div>
+
+        <div style="text-align:center;margin-top:40px;">
+            <a href="loja.html" class="btn btn-primary">Conheça nossa coleção</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-tiktok"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <p>© 2024 BIGBABYDOG - Todos os direitos reservados</p>
+    </footer>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        await import('./js/carrinho.js');
+
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('menuToggle');
+            const links = document.getElementById('navLinks');
+            if (toggle && links) {
+                toggle.addEventListener('click', () => {
+                    links.classList.toggle('open');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

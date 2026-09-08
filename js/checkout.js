@@ -2,9 +2,9 @@
 // CHECKOUT.JS - Finalização do pedido e integração WhatsApp
 // ============================================================
 
-console.log('🔥 CHECKOUT.JS carregado!'); // Log inicial para confirmar execução
+console.log('🔥 CHECKOUT.JS carregado!');
 
-const WHATSAPP_LOJA = '5512992229727'; // Número da loja (sem +)
+const WHATSAPP_LOJA = '5512992229727';
 
 function formatarMoeda(valor) {
     return new Intl.NumberFormat('pt-BR', {
@@ -17,6 +17,8 @@ class Checkout {
     constructor() {
         console.log('🛒 Inicializando checkout...');
         this.carrinho = JSON.parse(localStorage.getItem('bbd_carrinho') || '[]');
+        this.frete = 'A combinar';
+        this.valorFrete = 0;
         console.log('📦 Itens no carrinho:', this.carrinho);
         this.inicializar();
     }
@@ -77,13 +79,41 @@ class Checkout {
 
         const subtotal = this.calcularSubtotal();
         document.getElementById('resumoSubtotal').textContent = formatarMoeda(subtotal);
-        document.getElementById('resumoTotal').textContent = formatarMoeda(subtotal);
-        document.getElementById('resumoFrete').textContent = subtotal >= 250 ? 'GRÁTIS' : 'A combinar';
-        console.log('💰 Subtotal:', subtotal);
+
+        // Atualiza frete e total baseado na cidade (se já tiver sido preenchida)
+        this.atualizarFreteTotal();
+        console.log('💰 Subtotal:', subtotal, 'Frete:', this.frete, 'Valor:', this.valorFrete);
     }
 
     calcularSubtotal() {
         return this.carrinho.reduce((t, item) => t + (item.preco * item.quantidade), 0);
+    }
+
+    // Função para atualizar frete e total com base na cidade
+    atualizarFreteTotal() {
+        const cidadeInput = document.getElementById('cidade');
+        let cidade = cidadeInput ? cidadeInput.value.trim().toLowerCase() : '';
+
+        // Verifica se a cidade é Campos do Jordão (normaliza)
+        if (cidade.includes('campos do jordão') || cidade.includes('campos do jordao') || cidade === 'campos do jordão') {
+            this.frete = 'R$ 20,00';
+            this.valorFrete = 20;
+        } else {
+            this.frete = 'A combinar';
+            this.valorFrete = 0;
+        }
+
+        const subtotal = this.calcularSubtotal();
+        const total = subtotal + this.valorFrete;
+
+        document.getElementById('resumoFrete').textContent = this.frete;
+        document.getElementById('resumoTotal').textContent = formatarMoeda(total);
+
+        // Atualiza o texto do total com ou sem parênteses (vamos deixar sem)
+        const totalEl = document.getElementById('resumoTotal');
+        if (totalEl) {
+            totalEl.textContent = formatarMoeda(total);
+        }
     }
 
     configurarFormulario() {
@@ -120,11 +150,22 @@ class Checkout {
                 this.value = value;
             });
         }
+
+        // Adiciona evento de mudança nos campos cidade/CEP para recalcular frete
+        const cidadeInput = document.getElementById('cidade');
+        if (cidadeInput) {
+            cidadeInput.addEventListener('input', () => {
+                this.atualizarFreteTotal();
+            });
+        }
     }
 
     configurarBuscaCEP() {
         const cepInput = document.getElementById('cep');
-        if (!cepInput) return;
+        if (!cepInput) {
+            console.warn('⚠️ Campo CEP não encontrado.');
+            return;
+        }
 
         cepInput.addEventListener('blur', () => {
             const cep = cepInput.value.replace(/\D/g, '');
@@ -133,8 +174,19 @@ class Checkout {
                     .then(res => res.json())
                     .then(data => {
                         if (!data.erro) {
-                            document.getElementById('rua').value = data.logradouro || '';
-                            document.getElementById('bairro').value = data.bairro || '';
+                            const ruaInput = document.getElementById('rua');
+                            const bairroInput = document.getElementById('bairro');
+                            const cidadeInput = document.getElementById('cidade');
+                            const estadoInput = document.getElementById('estado');
+
+                            if (ruaInput) ruaInput.value = data.logradouro || '';
+                            if (bairroInput) bairroInput.value = data.bairro || '';
+                            if (cidadeInput) cidadeInput.value = data.localidade || '';
+                            if (estadoInput) estadoInput.value = data.uf || '';
+
+                            console.log('✅ CEP preenchido:', data);
+                            // Após preencher, recalcula frete
+                            this.atualizarFreteTotal();
                         } else {
                             alert('CEP não encontrado!');
                         }
@@ -145,7 +197,7 @@ class Checkout {
     }
 
     validarFormulario() {
-        const campos = ['nome', 'whatsapp', 'cep', 'rua', 'numero', 'bairro'];
+        const campos = ['nome', 'whatsapp', 'cep', 'rua', 'numero', 'bairro', 'cidade'];
         for (const id of campos) {
             const el = document.getElementById(id);
             if (!el || !el.value.trim()) {
@@ -172,6 +224,8 @@ class Checkout {
             numero: document.getElementById('numero').value.trim(),
             complemento: document.getElementById('complemento').value.trim(),
             bairro: document.getElementById('bairro').value.trim(),
+            cidade: document.getElementById('cidade').value.trim(),
+            estado: document.getElementById('estado').value.trim(),
             pagamento: document.getElementById('pagamento').value,
             observacoes: document.getElementById('observacoes').value.trim()
         };
@@ -184,10 +238,11 @@ class Checkout {
         }).join('\n\n');
 
         const subtotal = this.calcularSubtotal();
-        const frete = subtotal >= 250 ? 'GRÁTIS' : 'A combinar';
-        const endereco = `${dados.rua}, ${dados.numero}${dados.complemento ? ' - ' + dados.complemento : ''}\n${dados.bairro}\nCEP: ${dados.cep}`;
+        const total = subtotal + this.valorFrete;
 
-        return `🛒 *NOVO PEDIDO - BIGBABYDOG*\n\n👤 *Cliente:* ${dados.nome}\n📱 *WhatsApp:* ${dados.whatsapp}\n\n📦 *Itens do Pedido:*\n━━━━━━━━━━━━━━━━━━\n${itens}\n━━━━━━━━━━━━━━━━━━\n\n💰 *Resumo:*\nSubtotal: ${formatarMoeda(subtotal)}\nFrete: ${frete}\n*TOTAL: ${formatarMoeda(subtotal)}*\n\n📍 *Endereço de Entrega:*\n${endereco}\n\n💳 *Pagamento:* ${dados.pagamento}\n\n📝 *Obs:* ${dados.observacoes || 'Nenhuma'}\n\n✨ Obrigado pela preferência!`;
+        const endereco = `${dados.rua}, ${dados.numero}${dados.complemento ? ' - ' + dados.complemento : ''}\n${dados.bairro} - ${dados.cidade}/${dados.estado}\nCEP: ${dados.cep}`;
+
+        return `🛒 *NOVO PEDIDO - BIGBABYDOG*\n\n👤 *Cliente:* ${dados.nome}\n📱 *WhatsApp:* ${dados.whatsapp}\n\n📦 *Itens do Pedido:*\n━━━━━━━━━━━━━━━━━━\n${itens}\n━━━━━━━━━━━━━━━━━━\n\n💰 *Resumo:*\nSubtotal: ${formatarMoeda(subtotal)}\nFrete: ${this.frete}\n*TOTAL: ${formatarMoeda(total)}*\n\n📍 *Endereço de Entrega:*\n${endereco}\n\n💳 *Pagamento:* ${dados.pagamento}\n\n📝 *Obs:* ${dados.observacoes || 'Nenhuma'}\n\n✨ Obrigado pela preferência!`;
     }
 
     async processarPedido() {
@@ -204,38 +259,44 @@ class Checkout {
         const mensagem = this.formatarMensagemWhatsApp(dados);
         console.log('📨 Mensagem gerada:', mensagem);
 
-        // Salva pedido (opcional)
+        const subtotal = this.calcularSubtotal();
+        const total = subtotal + this.valorFrete;
+
+        const pedido = {
+            cliente_nome: dados.nome,
+            cliente_whatsapp: dados.whatsapp,
+            cliente_cep: dados.cep,
+            cliente_endereco: `${dados.rua}, ${dados.numero}${dados.complemento ? ' - ' + dados.complemento : ''}`,
+            cliente_bairro: dados.bairro,
+            cliente_cidade: dados.cidade,
+            cliente_estado: dados.estado,
+            forma_pagamento: dados.pagamento,
+            observacao: dados.observacoes,
+            itens: this.carrinho,
+            total: total,
+            status: 'Novo'
+        };
+
         try {
-            await window.supabase.from('pedidos').insert([{
-                pedido_id: idPedido,
-                cliente_nome: dados.nome,
-                cliente_whatsapp: dados.whatsapp,
-                cep: dados.cep,
-                rua: dados.rua,
-                numero: dados.numero,
-                complemento: dados.complemento,
-                bairro: dados.bairro,
-                pagamento: dados.pagamento,
-                observacoes: dados.observacoes,
-                itens: this.carrinho,
-                subtotal: this.calcularSubtotal(),
-                status: 'Novo'
-            }]);
-            console.log('✅ Pedido salvo no Supabase.');
+            const { data, error } = await window.supabase
+                .from('pedidos')
+                .insert([pedido]);
+            if (error) {
+                console.error('❌ Erro ao salvar pedido no Supabase:', error);
+            } else {
+                console.log('✅ Pedido salvo no Supabase:', data);
+            }
         } catch (e) {
             console.warn('⚠️ Não foi possível salvar no Supabase:', e);
         }
 
-        // Limpa carrinho
         localStorage.removeItem('bbd_carrinho');
         console.log('🧹 Carrinho limpo.');
 
-        // Abre WhatsApp
         const url = `https://wa.me/${WHATSAPP_LOJA}?text=${encodeURIComponent(mensagem)}`;
         console.log('🔗 Abrindo WhatsApp:', url);
         window.open(url, '_blank');
 
-        // Confirmação
         this.mostrarConfirmacao(idPedido, mensagem);
     }
 
@@ -257,9 +318,7 @@ class Checkout {
     }
 }
 
-// ---------- INICIALIZAÇÃO IMEDIATA ----------
-// Como o script é module, o DOM já está pronto.
-// Verifica se o DOM está carregado, se não, aguarda.
+// ---------- INICIALIZAÇÃO ----------
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         console.log('📄 DOM carregado, iniciando checkout...');

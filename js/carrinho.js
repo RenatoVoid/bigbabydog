@@ -1,6 +1,8 @@
 // ============================================================
-// CARRINHO.JS - Gestão do carrinho (localStorage)
+// CARRINHO.JS - Gestão do carrinho (com animação e layout melhorado)
 // ============================================================
+
+console.log('🛒 carrinho.js carregado');
 
 class Carrinho {
     constructor() {
@@ -12,7 +14,6 @@ class Carrinho {
     salvar() {
         localStorage.setItem('bbd_carrinho', JSON.stringify(this.itens));
         this.atualizarUI();
-        console.log('💾 Carrinho salvo:', this.itens);
     }
 
     adicionar(produto, tamanho, quantidade = 1) {
@@ -39,6 +40,7 @@ class Carrinho {
     remover(indice) {
         this.itens.splice(indice, 1);
         this.salvar();
+        this.renderizarItens();
     }
 
     alterarQuantidade(indice, novaQtd) {
@@ -48,6 +50,7 @@ class Carrinho {
         }
         this.itens[indice].quantidade = novaQtd;
         this.salvar();
+        this.renderizarItens();
     }
 
     calcularSubtotal() {
@@ -95,7 +98,9 @@ class Carrinho {
                     <p>Seu carrinho está vazio</p>
                     <p style="font-size:0.8rem;color:var(--text-muted)">Adicione produtos para continuar</p>
                 </div>`;
+            document.getElementById('cartFooter').style.display = 'none';
         } else {
+            document.getElementById('cartFooter').style.display = 'block';
             container.innerHTML = this.itens.map((item, index) => `
                 <div class="cart-item">
                     <img src="${item.imagem}" alt="${item.nome}" class="cart-item-img">
@@ -162,20 +167,20 @@ function injetarModalCarrinho() {
         <div id="cartOverlay" class="cart-overlay"></div>
         <div id="cartSidebar" class="cart-sidebar">
             <div class="cart-header">
-                <h3>🛒 Seu Carrinho</h3>
+                <h3><i class="fas fa-shopping-bag" style="color:var(--accent);margin-right:8px;"></i> Seu Carrinho</h3>
                 <button class="cart-close" onclick="window.carrinho.fechar()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="cart-items" id="cartItemsContainer"></div>
-            <div class="cart-footer" id="cartFooter">
+            <div class="cart-footer" id="cartFooter" style="display:none;">
                 <div class="cart-resumo">
                     <div><span>Subtotal:</span> <span id="cartSubtotal">R$ 0,00</span></div>
                     <div><span>Frete:</span> <span id="cartFrete">A combinar</span></div>
                     <div class="cart-total"><span>TOTAL:</span> <span id="cartTotal">R$ 0,00</span></div>
                 </div>
                 <button class="btn-finalizar" onclick="irParaCheckout()" id="btnFinalizarCart">
-                    FINALIZAR PEDIDO
+                    <i class="fas fa-credit-card"></i> FINALIZAR PEDIDO
                 </button>
                 <button class="btn-continuar" onclick="window.carrinho.fechar()">
                     CONTINUAR COMPRANDO
@@ -211,16 +216,10 @@ function atualizarContadorCarrinho() {
     setTimeout(() => contador.classList.remove('pulse'), 400);
 }
 
-// ---------- FUNÇÃO ADICIONAR AO CARRINHO (GLOBAL) ----------
+// ---------- ADICIONAR AO CARRINHO ----------
 async function adicionarAoCarrinho(produtoId, tamanho) {
     if (!tamanho) {
-        alert('Por favor, selecione um tamanho!');
-        return;
-    }
-
-    if (!window.carrinho) {
-        console.error('Carrinho não inicializado');
-        alert('Erro ao adicionar ao carrinho. Tente novamente.');
+        alert('Selecione um tamanho!');
         return;
     }
 
@@ -237,12 +236,11 @@ async function adicionarAoCarrinho(produtoId, tamanho) {
 
     window.carrinho.adicionar(produto, tamanho);
 }
-// 🔥 EXPÕE A FUNÇÃO GLOBALMENTE
 window.adicionarAoCarrinho = adicionarAoCarrinho;
 
-// ---------- INICIALIZAÇÃO IMEDIATA ----------
+// ---------- INICIALIZAÇÃO ----------
 injetarModalCarrinho();
 window.carrinho = new Carrinho();
 atualizarContadorCarrinho();
 
-console.log('✅ Carrinho e função adicionarAoCarrinho prontos!');
+console.log('✅ Carrinho pronto!');

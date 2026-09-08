@@ -1,5 +1,5 @@
 <!-- ============================================================
-     LOJA.HTML - Catálogo com busca e filtros
+     LOJA.HTML - Catálogo com busca e filtros por categoria
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -8,31 +8,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loja - BIGBABYDOG</title>
 
-    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- Estilos globais -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <!-- ========== NAVBAR ========== -->
     <nav class="navbar">
-        <a href="index.html" class="nav-logo">
-            BIGBABYDOG
-        </a>
+        <a href="index.html" class="nav-logo">BIGBABYDOG</a>
         <button class="menu-toggle" id="menuToggle" aria-label="Menu">
             <i class="fas fa-bars"></i>
         </button>
         <ul class="nav-links" id="navLinks">
             <li><a href="index.html">Home</a></li>
             <li><a href="loja.html" class="active">Loja</a></li>
-            <li><a href="index.html#sobre">Sobre</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
             <li>
                 <button class="nav-cart" onclick="window.carrinho?.abrir()" aria-label="Carrinho">
                     <i class="fas fa-shopping-bag"></i>
@@ -56,7 +49,6 @@
             <!-- Barra de busca e filtros -->
             <div class="filtros-bar">
                 <input type="text" id="buscaInput" class="busca-input" placeholder="Buscar produtos...">
-
                 <div style="display:flex; flex-wrap:wrap; gap:8px;">
                     <button class="filtro-btn active" data-categoria="todos">Todos</button>
                     <button class="filtro-btn" data-categoria="camiseta">Camisetas</button>
@@ -69,7 +61,6 @@
 
             <!-- Grid de produtos -->
             <div class="produtos-grid" id="catalogoGrid">
-                <!-- Carregando... -->
                 <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">
                     <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
                     <p style="margin-top:10px;">Carregando produtos...</p>
@@ -82,19 +73,25 @@
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
         <div class="social-icons">
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-tiktok"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
         </div>
         <p>© 2024 BIGBABYDOG - Todos os direitos reservados</p>
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
-    <script type="module" src="js/loja.js"></script>
-    <script type="module" src="js/carrinho.js"></script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('🔥 Supabase inicializado na loja');
 
-    <!-- Mobile menu toggle -->
-    <script>
+        await import('./js/carrinho.js');
+        await import('./js/loja.js');
+
+        // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', () => {
             const toggle = document.getElementById('menuToggle');
             const links = document.getElementById('navLinks');

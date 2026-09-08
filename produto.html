@@ -1,5 +1,5 @@
 <!-- ============================================================
-     PRODUTO.HTML - Página individual do produto
+     PRODUTO.HTML - Página individual do produto (com breadcrumb)
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -7,28 +7,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Produto - BIGBABYDOG</title>
-
-    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- Estilos globais -->
     <link rel="stylesheet" href="css/style.css">
-
-    <style>
-        .produto-loading { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-        .produto-loading i { font-size: 2.5rem; margin-bottom: 16px; display: block; }
-        .produto-erro { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-        .produto-erro i { font-size: 3rem; color: var(--accent); margin-bottom: 16px; display: block; }
-        .produto-erro .btn { margin-top: 20px; }
-        @media (max-width: 768px) {
-            .produto-detalhe { padding-top: 80px; }
-        }
-    </style>
 </head>
 <body>
 
@@ -41,7 +24,7 @@
         <ul class="nav-links" id="navLinks">
             <li><a href="index.html">Home</a></li>
             <li><a href="loja.html">Loja</a></li>
-            <li><a href="index.html#sobre">Sobre</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
             <li>
                 <button class="nav-cart" onclick="window.carrinho?.abrir()" aria-label="Carrinho">
                     <i class="fas fa-shopping-bag"></i>
@@ -51,60 +34,123 @@
         </ul>
     </nav>
 
+    <!-- ========== BREADCRUMB ========== -->
+    <div class="container" style="padding-top: 20px;">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <ol>
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="loja.html">Loja</a></li>
+                <li><span id="breadcrumbProduto">Produto</span></li>
+            </ol>
+        </nav>
+    </div>
+
     <!-- ========== CONTEÚDO PRINCIPAL ========== -->
     <main>
-        <div id="produtoContainer">
-            <!-- Loading -->
-            <div id="loadingProduto" class="produto-loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Carregando produto...</p>
+        <!-- Loading -->
+        <div id="loadingProduto" class="produto-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Carregando produto...</p>
+        </div>
+
+        <!-- Erro -->
+        <div id="erroProduto" class="produto-erro" style="display:none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Produto não encontrado.</p>
+            <a href="loja.html" class="btn btn-outline">Voltar à loja</a>
+        </div>
+
+        <!-- Detalhe do produto -->
+        <div id="detalheProduto" class="produto-detalhe" style="display:none;">
+            <!-- Coluna Esquerda: Galeria -->
+            <div class="produto-galeria">
+                <img id="galeriaPrincipal" src="" alt="" class="galeria-principal">
+                <div class="galeria-thumbs" id="galeriaThumbs"></div>
             </div>
 
-            <!-- Erro -->
-            <div id="erroProduto" class="produto-erro" style="display:none;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Produto não encontrado.</p>
-                <a href="loja.html" class="btn btn-outline">Voltar à loja</a>
-            </div>
+            <!-- Coluna Direita: Informações -->
+            <div class="produto-info">
+                <div class="produto-cat" id="produtoCategoria"></div>
+                <h1 id="produtoNome"></h1>
 
-            <!-- Detalhe do produto -->
-            <div id="detalheProduto" class="produto-detalhe" style="display:none;">
-                <!-- Galeria -->
-                <div class="produto-galeria">
-                    <img id="galeriaPrincipal" src="" alt="" class="galeria-principal">
-                    <div class="galeria-thumbs" id="galeriaThumbs"></div>
+                <!-- Avaliação (média) -->
+                <div class="produto-avaliacao" id="produtoAvaliacao">
+                    <span class="estrelas" id="mediaEstrelas">★★★★★</span>
+                    <span class="avaliacao-count" id="totalAvaliacoes">(0 avaliações)</span>
                 </div>
 
-                <!-- Informações -->
-                <div class="produto-info">
-                    <div class="produto-cat" id="produtoCategoria"></div>
-                    <h1 id="produtoNome"></h1>
-                    <div class="produto-preco">
-                        <span id="produtoPreco"></span>
-                        <s id="produtoPrecoAntigo" style="display:none;"></s>
-                    </div>
-                    <div id="produtoBadges" style="margin-bottom:16px;"></div>
-                    <div class="produto-desc" id="produtoDescricao"></div>
+                <div class="produto-preco">
+                    <span id="produtoPreco"></span>
+                    <s id="produtoPrecoAntigo" style="display:none;"></s>
+                </div>
+                <div id="produtoBadges" style="margin-bottom:16px;"></div>
+                <div class="produto-desc" id="produtoDescricao"></div>
 
-                    <!-- Tamanhos -->
-                    <div class="tamanho-selector">
-                        <h3>SELECIONE O TAMANHO <span style="color:var(--accent);">*</span></h3>
-                        <div class="tamanho-opcoes" id="tamanhoOpcoes"></div>
-                    </div>
+                <!-- Seletor de Tamanho -->
+                <div class="tamanho-selector">
+                    <h3>SELECIONE O TAMANHO <span style="color:var(--accent);">*</span></h3>
+                    <div class="tamanho-opcoes" id="tamanhoOpcoes"></div>
+                </div>
 
-                    <!-- Comprar -->
-                    <button class="btn-comprar" id="btnComprar" disabled>
-                        <i class="fas fa-shopping-cart"></i> SELECIONE UM TAMANHO
-                    </button>
+                <!-- Botão Comprar -->
+                <button class="btn-comprar" id="btnComprar" disabled>
+                    <i class="fas fa-shopping-cart"></i> SELECIONE UM TAMANHO
+                </button>
+
+                <!-- Informações extras -->
+                <div class="produto-extras">
+                    <div class="extra-item">
+                        <i class="fas fa-truck"></i>
+                        <span>Frete a combinar</span>
+                    </div>
+                    <div class="extra-item">
+                        <i class="fas fa-undo-alt"></i>
+                        <span>Troca em até 7 dias</span>
+                    </div>
+                    <div class="extra-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Compra segura</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sugestões -->
+        <!-- ========== SEÇÃO "QUEM COMPROU TAMBÉM LEVOU" ========== -->
         <section class="container" style="padding: 40px 20px 60px;">
             <h3 class="section-title">Quem comprou <span>também levou</span></h3>
-            <div class="produtos-grid" id="sugestoesGrid"></div>
+            <div class="produtos-grid" id="sugestoesGrid">
+                <!-- Preenchido via JavaScript -->
+            </div>
         </section>
+
+        <!-- ========== SEÇÃO DE AVALIAÇÕES ========== -->
+        <section class="container" style="padding: 0 20px 60px;">
+            <div class="avaliacoes-section">
+                <h3 class="section-title">Avaliações <span>dos clientes</span></h3>
+                
+                <!-- Formulário de avaliação -->
+                <div id="formAvaliacao" class="avaliacao-form">
+                    <h4>Deixe sua avaliação</h4>
+                    <div class="avaliacao-estrelas" id="avaliacaoEstrelas">
+                        <span data-nota="1">☆</span>
+                        <span data-nota="2">☆</span>
+                        <span data-nota="3">☆</span>
+                        <span data-nota="4">☆</span>
+                        <span data-nota="5">☆</span>
+                    </div>
+                    <input type="text" id="avaliacaoNome" placeholder="Seu nome" class="avaliacao-input">
+                    <textarea id="avaliacaoComentario" placeholder="Compartilhe sua experiência com o produto..." class="avaliacao-input" rows="3"></textarea>
+                    <button id="btnEnviarAvaliacao" class="btn btn-primary">Enviar avaliação</button>
+                    <div id="avaliacaoMensagem" style="margin-top:10px;font-weight:600;"></div>
+                </div>
+
+                <!-- Lista de avaliações -->
+                <div id="listaAvaliacoes" class="lista-avaliacoes">
+                    <p style="color:var(--text-muted);">Carregando avaliações...</p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ========== FOOTER ========== -->
@@ -123,10 +169,21 @@
         const SUPABASE_URL = 'https://lekzyptgypjkwpxuruel.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_9z5CfPvDD0XEK9RglCOh5w_VE_F9D4H';
         window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('✅ Supabase inicializado');
+        console.log('🔥 Supabase inicializado no produto');
+
         await import('./js/carrinho.js');
         await import('./js/produto.js');
-    </script>
 
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('menuToggle');
+            const links = document.getElementById('navLinks');
+            if (toggle && links) {
+                toggle.addEventListener('click', () => {
+                    links.classList.toggle('open');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
